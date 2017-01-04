@@ -36,6 +36,8 @@ nbdist/
 .nb-gradle/
 
 #Eclipse
+build/
+bin/
 .metadata
 tmp/
 *.tmp

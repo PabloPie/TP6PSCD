@@ -1,7 +1,7 @@
 #*****************************************************************
 # File:   Makefile
-# Author: PSCD-Unizar
-# Date:   noviembre 2015
+# Author: Pablo Piedrafita / Hilton Lipschitz
+# Date:   Enero 2017
 # Coms:   Compilar mediante "make"
 #*****************************************************************
 
@@ -21,12 +21,15 @@ LIB :=-pthread
 all: $(TARGET)
 # Create the executable
 $(TARGET): $(OBJECTS)
-	$(CC) $^ -o $(TARGET) $(LIB)
+	@echo " Linking..."
+	@echo " $(CC) $^ -o $(TARGET) $(LIB)";$(CC) $^ -o $(TARGET) $(LIB)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
-	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
+	@mkdir -p $(BUILDDIR)
+	@echo " $(CC) $(CFLAGS) -c -o $@ $<";$(CC) $(CFLAGS) -c -o $@ $<
 
-clean:   
-	$(RM) -r $(BUILDDIR) $(TARGET); $(RM) -r $(BUILDDIR) $(TARGET)
+clean:
+	@echo " Cleaning...";
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)";$(RM) -r $(BUILDDIR) $(TARGET)
 
 .PHONY: clean
