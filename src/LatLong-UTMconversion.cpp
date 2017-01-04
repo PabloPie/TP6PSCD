@@ -8,8 +8,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "constants.h"
-#include "LatLong-UTMconversion.h"
+#include "../headers/constants.h"
+#include "../headers/LatLong-UTMconversion.h"
 
 
 // Reference ellipsoids derived from Peter H. Dana's website- 

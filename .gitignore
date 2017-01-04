@@ -30,7 +30,6 @@
 
 #Netbeans
 nbproject/private/
-build/
 nbbuild/
 dist/
 nbdist/
@@ -38,7 +37,6 @@ nbdist/
 
 #Eclipse
 .metadata
-bin/
 tmp/
 *.tmp
 *.bak

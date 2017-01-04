@@ -5,24 +5,28 @@
 # Coms:   Compilar mediante "make"
 #*****************************************************************
 
-CC = g++
-RM=/bin/rm
+SRCDIR := src
+BUILDDIR := build
+TARGET := bin/main
 
-FLAGS=-std=c++11 -fmax-errors=1 -Werror -I. -O2 
-LIBS=-pthread
+CC := g++
+RM :=/bin/rm
 
+SRCEXT := cpp
+SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+CFLAGS :=-std=c++11 -fmax-errors=1 -Werror -I. -O2 
+LIB :=-pthread
+
+all: $(TARGET)
 # Create the executable
-all: main
+$(TARGET): $(OBJECTS)
+	$(CC) $^ -o $(TARGET) $(LIB)
 
-main: main.o LatLong-UTMconversion.o
-	${CC} $(FLAGS) main.o LatLong-UTMconversion.o -o main ${LIBS}
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
-main.o: main.cpp
-	${CC} $(FLAGS) -c main.cpp  ${LIBS}
+clean:   
+	$(RM) -r $(BUILDDIR) $(TARGET); $(RM) -r $(BUILDDIR) $(TARGET)
 
-LatLong-UTMconversion.o: LatLong-UTMconversion.cpp LatLong-UTMconversion.h
-	${CC} $(FLAGS) -c LatLong-UTMconversion.cpp  ${LIBS}
-clean:
-	$(RM) -f main *.o
-
-
+.PHONY: clean
