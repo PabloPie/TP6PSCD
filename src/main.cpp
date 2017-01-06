@@ -10,13 +10,17 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <vector>
 #include "../headers/LatLong-UTMconversion.h"
+#include "../headers/DataInitializer.h"
+#include "../headers/Monumento.h"
+#include "../headers/Restaurante.h"
 
 using namespace std;
 
 // Ejemplo: EINA: 41.6834N, 0.8874W
 
-int main(){
+int pruebaCoord(){
 	double Lat = 41.6834;
 	double Long = -0.8874;
 	double UTMNorthing;
@@ -44,7 +48,7 @@ int main(){
 
 	UTMtoLL(RefEllipsoid, UTMNorthing, UTMEasting, UTMZoneZgza, Lat, Long);
 	cout << "detalle_ArtePublico_97 en Torrero (Lat, Long):  (" << Lat << "," << Long << ")" << endl;
-	string cmd("firefox https://www.google.com/maps/place/"+to_string(Lat)+","+to_string(Long));
+	string cmd("google-chrome https://www.google.com/maps/place/"+to_string(Lat)+","+to_string(Long));
 	//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
 	int resCall = system(cmd.c_str());
 	if(resCall != 0){
@@ -52,5 +56,23 @@ int main(){
 		return 1;
 	}else{
 		return 0;
+	}
+}
+
+int main(){
+	vector<Monumento> monumentos;
+	vector<Restaurante> restaurantes;
+	int numMon = obtenerDatos(monumentos,"/home/cold/ownCloud/Universidad/PSCD/Trabajo/TP6PSCD/datos/arte.json");
+	int numRes = obtenerDatos(restaurantes,"/home/cold/ownCloud/Universidad/PSCD/Trabajo/TP6PSCD/datos/restaurantes.json");
+	cout << "Numero de monumentos: " << numMon << endl;
+	cout << "Numero de restaurantes: " << numRes << endl;
+
+	for(auto a: monumentos){
+		cout << a.getLon() << ";";
+		cout << a.getLat() << endl;
+	}
+	for(auto a: restaurantes){
+		cout << a.getLon() << ";";
+		cout << a.getLat() << endl;
 	}
 }

@@ -7,45 +7,32 @@ using namespace std;
 
 class Monumento{
 public:
-	const string& getAutor() const;
-	void setAutor(const string& autor);
-
-	const string& getBarrio() const;
-	void setBarrio(const string& barrio);
-
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
-
-	const string& getEpoca() const;
-	void setEpoca(const string& epoca);
-
-	const string& getIconografia() const;
-	void setIconografia(const string& iconografia);
-
+	const string& getDescripcion() const;
+	void setDescripcion(const string& descripcion);
+	const string& getDate() const;
+	void setDate(const string& fecha);
+	const string& getIcon() const;
+	void setIcon(const string& icono);
 	double getLat() const;
 	void setLat(double lat);
-
+	const string& getURL() const;
+	void setURL(const string& link);
 	double getLon() const;
 	void setLon(double lon);
-
-	const string& getMaterial() const;
-	void setMaterial(const string& material);
-
-	const string& getNombre() const;
-	void setNombre(const string& nombre);
-
-	const string& getUrl() const;
-	void setUrl(const string& url);
+	const string& getTitle() const;
+	void setTitle(const string& title);
+	//Se compara por posición, si la latitud y longitud coinciden, son el mismo
+	bool operator==(Monumento m);
 
 private:
-	string nombre;
-	string autor;
+	string title;
+	string link;
+	string descripcion;
 	string categoria;
-	string epoca;
-	string barrio;
-	string iconografia;
-	string material;
-	string URL;
+	string fecha;
+	string icono;
 	double lat;
 	double lon;
 };

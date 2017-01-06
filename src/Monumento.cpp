@@ -1,53 +1,52 @@
 #include "../headers/Monumento.h"
 
-
-const string& Monumento::getAutor() const {
-	return autor;
-};
-
-void Monumento::setAutor(const string& autor) {
-	this->autor = autor;
-};
-
-const string& Monumento::getBarrio() const {
-	return barrio;
-};
-
-void Monumento::setBarrio(const string& barrio) {
-	this->barrio = barrio;
-};
-
 const string& Monumento::getCategoria() const {
 	return categoria;
-};
+}
 
 void Monumento::setCategoria(const string& categoria) {
 	this->categoria = categoria;
-};
+}
 
-const string& Monumento::getEpoca() const {
-	return epoca;
-};
+const string& Monumento::getDescripcion() const {
+	return descripcion;
+}
 
-void Monumento::setEpoca(const string& epoca) {
-	this->epoca = epoca;
-};
+void Monumento::setDescripcion(const string& descripcion) {
+	this->descripcion = descripcion;
+}
 
-const string& Monumento::getIconografia() const {
-	return iconografia;
-};
+const string& Monumento::getDate() const {
+	return fecha;
+}
 
-void Monumento::setIconografia(const string& iconografia) {
-	this->iconografia = iconografia;
-};
+void Monumento::setDate(const string& fecha) {
+	this->fecha = fecha;
+}
+
+const string& Monumento::getIcon() const {
+	return icono;
+}
+
+void Monumento::setIcon(const string& icono) {
+	this->icono = icono;
+}
 
 double Monumento::getLat() const {
 	return lat;
-};
+}
 
 void Monumento::setLat(double lat) {
 	this->lat = lat;
-};
+}
+
+const string& Monumento::getURL() const {
+	return link;
+}
+
+void Monumento::setURL(const string& link) {
+	this->link = link;
+}
 
 double Monumento::getLon() const {
 	return lon;
@@ -55,28 +54,16 @@ double Monumento::getLon() const {
 
 void Monumento::setLon(double lon) {
 	this->lon = lon;
-};
+}
 
-const string& Monumento::getMaterial() const {
-	return material;
-};
+const string& Monumento::getTitle() const {
+	return title;
+}
 
-void Monumento::setMaterial(const string& material) {
-	this->material = material;
-};
+void Monumento::setTitle(const string& title) {
+	this->title = title;
+}
 
-const string& Monumento::getNombre() const {
-	return nombre;
-};
-
-void Monumento::setNombre(const string& nombre) {
-	this->nombre = nombre;
-};
-
-const string& Monumento::getUrl() const {
-	return URL;
-};
-
-void Monumento::setUrl(const string& url) {
-	URL = url;
-};
+bool Monumento::operator==(Monumento m){
+	return this->getLat()==m.getLat() && this->getLon()==m.getLon();
+}

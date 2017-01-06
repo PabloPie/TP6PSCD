@@ -10,12 +10,11 @@ BUILDDIR := build
 TARGET := bin/main
 
 CC := g++
-RM :=/bin/rm
 
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=-std=c++11 -fmax-errors=1 -Werror -I. -O2 
+CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 #-Werror
 LIB :=-pthread
 
 all: $(TARGET)
@@ -30,6 +29,6 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 
 clean:
 	@echo " Cleaning...";
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET)";$(RM) -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUILDDIR) $(TARGET)";rm -r $(BUILDDIR) $(TARGET)
 
 .PHONY: clean
