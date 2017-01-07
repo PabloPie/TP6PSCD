@@ -4,6 +4,7 @@
  * Fecha de entrega: 10/01/2017
  */
 #include "../headers/Busqueda.h"
+#include <math.h>
 
 using namespace std;
         
@@ -92,7 +93,7 @@ Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>
 		}
 	}
 	return res;
-	//Parte de otra función
+	/*Parte de otra funciï¿½n
 	string cmd("firefox https://www.google.com/maps/place/"+to_string(latRest)+","+to_string(lonRest));
 	//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
 	int resCall = system(cmd.c_str());
@@ -101,6 +102,6 @@ Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>
 		return 1;
 	}else{
 		return 0;
-	}
+	}*/
 }
 

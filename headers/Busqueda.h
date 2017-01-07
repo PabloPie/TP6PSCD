@@ -1,5 +1,6 @@
-
+#include "Restaurante.h"
 #include "Monumento.h"
+#include <vector>
 
 /*
  * Pre: c != null y n<= que la longitud de c.
