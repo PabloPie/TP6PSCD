@@ -1,5 +1,10 @@
 #include "../headers/Monumento.h"
 
+Monumento::Monumento() {
+	this->lat = -200;
+	this->lon = -200;
+}
+
 const string& Monumento::getCategoria() const {
 	return categoria;
 }
@@ -64,35 +69,37 @@ void Monumento::setTitle(const string& title) {
 	this->title = title;
 }
 
-bool Monumento::operator==(Monumento m){
-	return this->getLat()==m.getLat() && this->getLon()==m.getLon();
+bool Monumento::operator==(Monumento m) {
+	return this->getLat() == m.getLat() && this->getLon() == m.getLon();
 }
 
-int Monumento::compare(Monumento m){
+int Monumento::compare(Monumento m) {
 	int i = 0;
-	if (!this->title.compare(m.title)){
+	if (!this->title.compare(m.title) && !this->title.empty()) {
 		i++;
 	}
-	if( !this->link.compare(m.link)){
+	if (!this->link.compare(m.link) && !this->link.empty()) {
 		i++;
 	}
-	if(!this->descripcion.compare(m.descripcion)){
+	if (!this->descripcion.compare(m.descripcion)
+			&& !this->descripcion.empty()) {
 		i++;
 	}
-	if(!this->categoria.compare(m.categoria)){
+	if (!this->categoria.compare(m.categoria) && !this->categoria.empty()) {
 		i++;
 	}
-	if(!this->fecha.compare(m.fecha)){
+	if (!this->fecha.compare(m.fecha) && !this->fecha.empty()) {
 		i++;
 	}
-	if(!this->icono.compare(m.icono)){
+	if (!this->icono.compare(m.icono) && !this->icono.empty()) {
 		i++;
 	}
-	if(this->lat == m.lat){
+	if (this->lat == m.lat && this->lat != -200) {
 		i++;
 	}
-	if(this->lon == m.lon){
+	if (this->lon == m.lon && this->lat != -200) {
 		i++;
 	}
 	return i;
+
 }

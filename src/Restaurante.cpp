@@ -1,5 +1,10 @@
 #include "../headers/Restaurante.h"
 
+Restaurante::Restaurante(){
+	this->lat=-200;
+	this->lon=-200;
+}
+
 const string& Restaurante::getCategoria() const {
 	return categoria;
 }

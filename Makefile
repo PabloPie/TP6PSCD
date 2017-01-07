@@ -7,7 +7,7 @@
 
 SRCDIR := src
 BUILDDIR := build
-TARGET := bin/main
+TARGET := bin/Servidor
 
 CC := g++
 

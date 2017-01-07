@@ -7,6 +7,7 @@ using namespace std;
 
 class Restaurante{
 private:
+
 	string title;
 	string link;
 	string descripcion;
@@ -17,6 +18,7 @@ private:
 	double lon;
 
 public:
+	Restaurante();
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
 	const string& getDescripcion() const;

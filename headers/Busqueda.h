@@ -1,3 +1,6 @@
+#ifndef _BUSQUEDA_H
+#define _BUSQUEDA_H
+
 #include "Restaurante.h"
 #include "Monumento.h"
 #include <vector>
@@ -21,3 +24,5 @@ int posDeReemplazo (int* c, int n);
 int busquedaMonumento(Monumento* m,Monumento* resultado, Monumento& a, int n, int n2);
 
 Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>& r);
+
+#endif

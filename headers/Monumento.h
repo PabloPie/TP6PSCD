@@ -8,6 +8,7 @@ using namespace std;
 class Monumento{
 public:
 	//Getters y setters
+	Monumento();
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
 	const string& getDescripcion() const;

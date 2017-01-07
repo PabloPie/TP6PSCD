@@ -1,3 +1,6 @@
+#ifndef _DATA_INITIALIZER_H
+#define _DATA_INITIALIZER_H
+
 #include "../headers/json.hpp"
 #include "../headers/LatLong-UTMconversion.h"
 #include <string>
@@ -64,3 +67,5 @@ json leer_json(string fichero) {
 	json j(ifs);
 	return j;
 }
+
+#endif
