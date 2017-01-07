@@ -18,3 +18,5 @@ int posDeReemplazo (int* c, int n);
  * Devuelve el número de elementos encontrados. 
  */
 int busquedaMonumento(Monumento* m,Monumento* resultado, Monumento& a, int n, int n2);
+
+Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>& r);

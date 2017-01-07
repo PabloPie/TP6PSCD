@@ -65,3 +65,42 @@ int busquedaMonumento(Monumento* m,Monumento* resultado, Monumento& a, int n, in
     }
 }
 
+//Función que calcula la distancia entre dos coordenadas del plano cartesiano
+double Calculo (double North1,double East1, double North2,double East2){
+	double result = pow((North1 - North2),2) + pow((East1 - East2),2);
+	return sqrt(result);
+}
+
+//fórmula de búsqueda de restaurantes en función de la cercanía a un punto.
+Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>& r ){
+
+	//Sacar coordenadas del Monumento
+	double latRest=90;
+	double lonRest=180;
+	double lat=m.getLat();	// Extraer de tabla de datos
+	double lon=m.getLon();	// Extraer de tabal de datos
+	Restaurante res;
+	//Sacar coordenadas de los restaurantes
+	for(auto a: r){
+		double auxLat=a.getLat();	// Extraer de tabla de datos
+		double auxLon=a.getLon();	// Extraer de tabla de datos
+		//Si es menor distancia: actualizar
+		if(Calculo( lat, lon, latRest, lonRest) > Calculo(lat, lon, auxLat, auxLon)){
+			latRest=auxLat;
+			lonRest=auxLon;
+			res = a;
+		}
+	}
+	return res;
+	//Parte de otra funci�n
+	string cmd("firefox https://www.google.com/maps/place/"+to_string(latRest)+","+to_string(lonRest));
+	//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
+	int resCall = system(cmd.c_str());
+	if(resCall != 0){
+		cerr << "Ha habido algún problema al abrir el navegador" << endl;
+		return 1;
+	}else{
+		return 0;
+	}
+}
+
