@@ -32,7 +32,7 @@ int busquedaMonumento(Monumento* m,Monumento* resultado, Monumento& a, int n, in
     int coincidencias;
     int i = 0;
     while(i<n && minCoincidencias!=5){
-       //coincidencias = compare(m[i],a);
+       coincidencias = m[i].compare(a);
        if(coincidencias>minCoincidencias){
            resultado[reemplazo]=m[i];
            reemplazo = posDeReemplazo(c,n2);

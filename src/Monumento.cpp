@@ -67,3 +67,32 @@ void Monumento::setTitle(const string& title) {
 bool Monumento::operator==(Monumento m){
 	return this->getLat()==m.getLat() && this->getLon()==m.getLon();
 }
+
+int Monumento::compare(Monumento m){
+	int i = 0;
+	if (!this->title.compare(m.title)){
+		i++;
+	}
+	if( !this->link.compare(m.link)){
+		i++;
+	}
+	if(!this->descripcion.compare(m.descripcion)){
+		i++;
+	}
+	if(!this->categoria.compare(m.categoria)){
+		i++;
+	}
+	if(!this->fecha.compare(m.fecha)){
+		i++;
+	}
+	if(!this->icono.compare(m.icono)){
+		i++;
+	}
+	if(this->lat == m.lat){
+		i++;
+	}
+	if(this->lon == m.lon){
+		i++;
+	}
+	return i;
+}

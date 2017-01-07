@@ -7,6 +7,7 @@ using namespace std;
 
 class Monumento{
 public:
+	//Getters y setters
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
 	const string& getDescripcion() const;
@@ -23,10 +24,14 @@ public:
 	void setLon(double lon);
 	const string& getTitle() const;
 	void setTitle(const string& title);
+
 	//Se compara por posición, si la latitud y longitud coinciden, son el mismo
 	bool operator==(Monumento m);
+	//Devuelve el número de coincidencias entre this y m
+	int compare(Monumento m);
 
 private:
+	//Corresponden a los campos del JSON
 	string title;
 	string link;
 	string descripcion;

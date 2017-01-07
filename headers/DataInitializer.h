@@ -14,8 +14,7 @@ template<class T> void obtener_loc(T &obj, json &loc);
 
 //Añade al vector de T que recibe como parametro los T del
 //fichero file_monumentos que debe seguir el formato json del ayuntamiento de Zaragoza
-template<class T> int obtenerDatos(vector<T> &v,
-		string fichero) {
+template<class T> int obtenerDatos(vector<T> &v, string fichero) {
 	json j = leer_json(fichero);
 	json s = j["/features"_json_pointer]; //lista de los monumentos
 	//Recorremos lista de monumentos y los añadimos al vector
@@ -51,7 +50,7 @@ template<class T> void obtener_info(T &obj, json &info) {
 
 }
 
-//Recibe el json de un monumento y devuelvo un objeto monumento
+//Recibe el json de un monumento y añade a los campos de obj la info y localizacion
 template<class T> void json_a_objeto(json &s, T &obj) {
 	json j_localizacion = s["/geometry"_json_pointer]; // {"coordinates":[676105.25,4610179.46],"type":"Point"}
 	json j_info = s["/properties"_json_pointer];
