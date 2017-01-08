@@ -84,12 +84,13 @@ int main(int argc, char* argv[]) {
 
 	int con;	//Cuenta numero de conexiones totales
 	inicializarDatos();	//Inicializamos los datos
-	while (true) {
+	bool fin = false;
+	while (!fin) {
 		int client_fd = socket.Accept();
 		if (client_fd > 0) {
 			cout << "Cliente " << con++ << endl;
-			//thread t = thread(&atenderCliente, client_fd, ref(socket));
-			//t.detach();
+			thread t = thread(&atenderCliente, client_fd, ref(socket));
+			t.detach();
 
 		} else {
 			cerr << "Error en el accept: " << strerror(errno) << endl;
@@ -111,6 +112,7 @@ int main(int argc, char* argv[]) {
 void atenderCliente(int cliente, Socket &sck) {
 	int length = 100;
 	string buffer;
+	int consultas = 0;
 	bool out = false; // Inicialmente no salir del bucle
 	while (!out) {
 		// Recibimos el mensaje del cliente
@@ -136,7 +138,7 @@ void atenderCliente(int cliente, Socket &sck) {
 				sck.Close(cliente);
 				exit(1);
 			}
-			//TODO: crear función para procesado de la petición
+			//TODO: crear función para procesado de la petición?
 			//Creamos un monumento con la info recibida
 			double lat = atof(info[6].c_str());
 			double lon = atof(info[7].c_str());
@@ -148,16 +150,17 @@ void atenderCliente(int cliente, Socket &sck) {
 			Restaurante r;
 			array<Monumento, 5> mon_seleccionados;
 			bool resultado = busquedaMonumento(monumentos, mon_seleccionados, m,
-					0, monumentos.size());
+					0, mon_seleccionados.size());
 			//Si no hay resultados
 			if (!resultado) {
 				msg = "Ningun resultado";
 			} else {
 				msg = "";
-				//TODO: enviamos los resultados al cliente y esperamos respuesta
+				//Construimos el mensaje para el cliente con los monumentos
 				for (Monumento m : mon_seleccionados) {
 					msg += m.getURL() + '*';
 				}
+
 				//Enviamos los monumentos
 				int send_bytes = sck.Send(cliente, msg);
 				if (send_bytes == -1) {
@@ -166,6 +169,8 @@ void atenderCliente(int cliente, Socket &sck) {
 					sck.Close(cliente);
 					exit(1);
 				}
+
+				//Recibimos el número de monumento que quiere
 				int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
 				if (rcv_bytes == -1) {
 					cerr << "Error al recibir datos: " << strerror(errno)
@@ -173,19 +178,26 @@ void atenderCliente(int cliente, Socket &sck) {
 					// Cerramos la conexión con el cliente
 					sck.Close(cliente);
 				}
+
+				//Seleccionamos el monumento
 				Monumento m1 = mon_seleccionados[stoi(buffer)];
+				//Buscamos el restaurante mas cercano
 				r = BusquedaRestauranteCerc(m1, restaurantes);
-				int send_bytes = sck.Send(cliente, r.getURL());
+				//lat;lon
+				msg = to_string(r.getLat())+";"+to_string(r.getLon());
+				//Enviamos la posicion del restaurante al cliente
+				int send_bytes = sck.Send(cliente, msg);
 				if (send_bytes == -1) {
 					cerr << "Error al enviar datos: " << strerror(errno)
 							<< endl;
 					sck.Close(cliente);
 					exit(1);
 				}
+				consultas++;
 			}
-
-			// Enviamos la respuesta
-			int send_bytes = sck.Send(cliente, msg);
+			string price = to_string(consultas * precio);
+			// Enviamos el resultado final de sus peticiones
+			int send_bytes = sck.Send(cliente, price);
 			if (send_bytes == -1) {
 				cerr << "Error al enviar datos: " << strerror(errno) << endl;
 				// Cerramos el socket
