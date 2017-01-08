@@ -12,9 +12,11 @@
 #include <sstream>
 #include <thread>
 #include <atomic>
+#include <stdlib.h>
 #include "../headers/DataInitializer.h"
 #include "../headers/Restaurante.h"
 #include "../headers/Monumento.h"
+#include "../headers/ImageDownloader.h"
 
 using namespace std;
 
@@ -27,6 +29,11 @@ const int precio = 100;
 const string f_restaurante("datos/restaurantes.json");
 const string f_monumentos("datos/arte.json");
 
+char url_monumentos[500] =
+		"http://www.zaragoza.es/georref/json/hilo/verconsulta_Piezas?georss_tag_1=-&georss_materiales=-&georss_tematica=-&georss_barrio=-&georss_epoca=-";
+char url_restaurante[500] =
+		"http://www.zaragoza.es/georref/json/hilo/ver_Restaurante";
+
 //Vectores con la información de los JSON
 vector<Restaurante> restaurantes;
 vector<Monumento> monumentos;
@@ -35,6 +42,7 @@ vector<Monumento> monumentos;
 void atenderCliente(int cliente, Socket &sck);
 void inicializarDatos();
 void pruebas();
+bool messageParser(string buffer, array<string, 9> &info, string delimiter);
 
 //-------------------------------------------------------------
 int main(int argc, char* argv[]) {
@@ -73,6 +81,7 @@ int main(int argc, char* argv[]) {
 		socket.Close(socket_fd);
 		exit(1);
 	}
+
 	int con;	//Cuenta numero de conexiones totales
 	inicializarDatos();	//Inicializamos los datos
 	while (true) {
@@ -117,29 +126,63 @@ void atenderCliente(int cliente, Socket &sck) {
 		} else {
 			cout << "Mensaje recibido: '" << buffer << "'" << endl;
 
-			//Parseamos el mensaje
-			string info[9]; // 8 terminos y id cliente
-			string s = buffer;
-			string delimiter = "*";
-			int i = 0;
-			size_t pos = 0;
-			string token;
-			while ((pos = s.find(delimiter)) != string::npos) {
-				if (i > 9) {
-					cout << "Error, mensaje recibido no respeta formato."
-							<< endl;
-					sck.Send(cliente, "-1");
-					sck.Close(cliente);
-					return;
-				}
-				token = s.substr(0, pos);
-				info[i] = token;
-				i++;
-				s.erase(0, pos + 1);
+			//Parseamos el mensaje:
+			//titulo*link*descripcion*categoria*fecha*icono*lat*lon*idusuario
+			array<string, 9> info;
+			bool parse_ok = messageParser(buffer, info, "*");
+			if (!parse_ok) {
+				cout << "Error, mensaje recibido no respeta formato." << endl;
+				sck.Send(cliente, "-1");
+				sck.Close(cliente);
+				exit(1);
 			}
-			info[8] = s;
+			//TODO: crear función para procesado de la petición
+			//Creamos un monumento con la info recibida
+			double lat = atof(info[6].c_str());
+			double lon = atof(info[7].c_str());
+			Monumento m(info[0], info[1], info[2], info[3], info[4], info[5],
+					atof(info[6].c_str()), atof(info[7].c_str()));
+
+			//Buscamos con los datos que nos da el cliente
 			string msg;
-			//TODO: Buscamos con los datos que nos da el cliente
+			Restaurante r;
+			array<Monumento, 5> mon_seleccionados;
+			bool resultado = busquedaMonumento(monumentos, mon_seleccionados, m,
+					0, monumentos.size());
+			//Si no hay resultados
+			if (!resultado) {
+				msg = "Ningun resultado";
+			} else {
+				msg = "";
+				//TODO: enviamos los resultados al cliente y esperamos respuesta
+				for (Monumento m : mon_seleccionados) {
+					msg += m.getURL() + '*';
+				}
+				//Enviamos los monumentos
+				int send_bytes = sck.Send(cliente, msg);
+				if (send_bytes == -1) {
+					cerr << "Error al enviar datos: " << strerror(errno)
+							<< endl;
+					sck.Close(cliente);
+					exit(1);
+				}
+				int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
+				if (rcv_bytes == -1) {
+					cerr << "Error al recibir datos: " << strerror(errno)
+							<< endl;
+					// Cerramos la conexión con el cliente
+					sck.Close(cliente);
+				}
+				Monumento m1 = mon_seleccionados[stoi(buffer)];
+				r = BusquedaRestauranteCerc(m1, restaurantes);
+				int send_bytes = sck.Send(cliente, r.getURL());
+				if (send_bytes == -1) {
+					cerr << "Error al enviar datos: " << strerror(errno)
+							<< endl;
+					sck.Close(cliente);
+					exit(1);
+				}
+			}
 
 			// Enviamos la respuesta
 			int send_bytes = sck.Send(cliente, msg);
@@ -160,7 +203,29 @@ void atenderCliente(int cliente, Socket &sck) {
 	}
 }
 
+bool messageParser(string buffer, array<string, 9> &info, string delimiter) {
+	// 8 terminos y id cliente: titulo*link*...*idcliente
+	int i = 0;
+	size_t pos = 0;
+	string token;
+	while ((pos = buffer.find(delimiter)) != string::npos) {
+		if (i > info.size()) {
+			return false;
+		}
+		token = buffer.substr(0, pos);
+		info[i] = token;
+		i++;
+		buffer.erase(0, pos + 1);
+	}
+	info[8] = buffer;
+	return true;
+}
+
 void inicializarDatos() {
+	cout << "Descargando datos..." << endl;
+	ImageDownloader i;
+	i.downloadImage(url_monumentos, "datos/arte.json");
+	i.downloadImage(url_restaurante, "datos/restaurantes.json");
 	cout << "Inicializando datos..." << endl;
 	int numMon = obtenerDatos(monumentos, f_monumentos);
 	int numRes = obtenerDatos(restaurantes, f_restaurante);

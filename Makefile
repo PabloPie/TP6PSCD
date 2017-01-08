@@ -14,8 +14,8 @@ CC := g++
 SRCEXT := cpp
 SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
 OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
-CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 #-Werror
-LIB :=-pthread
+CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 -I/usr/local/include #-Werror
+LIB :=-pthread -lcurl
 
 all: $(TARGET)
 # Create the executable

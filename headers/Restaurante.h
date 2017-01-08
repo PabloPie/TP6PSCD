@@ -18,7 +18,8 @@ private:
 	double lon;
 
 public:
-	Restaurante();
+	Restaurante();//Constructor
+	//Getters & setters
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
 	const string& getDescripcion() const;
@@ -35,6 +36,7 @@ public:
 	void setLon(double lon);
 	const string& getTitle() const;
 	void setTitle(const string& title);
+
 	//Se compara por posición, si la latitud y longitud coinciden, son el mismo
 	bool operator==(Restaurante m);
 };
