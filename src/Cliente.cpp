@@ -23,7 +23,7 @@ void elegirTerminos(int& contador, bool* correcto){
         int num = 1;
         int i = 0;
         cout<<"Ha elegido demasiados terminos\n";
-        while(num<=contador&&i<10){
+        while(num<=contador&&i<6){
             if(correcto[i]){
                 cout<<"\t" + to_string(num)+ ". " + TERMINOS[i] +".\n";
                 tabla[num-1]=i;
