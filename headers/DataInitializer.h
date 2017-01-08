@@ -26,6 +26,7 @@ template<class T> int obtenerDatos(vector<T> &v, string fichero) {
 		json_a_objeto(it.value(), obj);
 		v.push_back(obj);
 	}
+	//Eliminamos repetidos
 	auto last = std::unique(v.begin(), v.end());
 	v.erase(last, v.end());
 	return v.size();
@@ -67,5 +68,6 @@ json leer_json(string fichero) {
 	json j(ifs);
 	return j;
 }
+
 
 #endif

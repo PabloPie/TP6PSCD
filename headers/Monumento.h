@@ -5,10 +5,13 @@
 
 using namespace std;
 
-class Monumento{
+class Monumento {
 public:
-	//Getters y setters
+
 	Monumento();
+	Monumento(string title, string link, string descripcion, string categoria,
+			string fecha, string icono, double lat, double lon);
+	//Getters y setters
 	const string& getCategoria() const;
 	void setCategoria(const string& categoria);
 	const string& getDescripcion() const;
@@ -42,7 +45,5 @@ private:
 	double lat;
 	double lon;
 };
-
-
 
 #endif

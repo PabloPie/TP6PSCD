@@ -5,6 +5,18 @@ Monumento::Monumento() {
 	this->lon = -200;
 }
 
+Monumento::Monumento(string title, string link, string descripcion,
+		string categoria, string fecha, string icono, double lat, double lon) {
+	this->title = title;
+	this->link = link;
+	this->descripcion = descripcion;
+	this->categoria = categoria;
+	this->fecha = fecha;
+	this->icono = icono,
+	this->lat = lat;
+	this->lon = lon;
+}
+
 const string& Monumento::getCategoria() const {
 	return categoria;
 }
@@ -72,6 +84,8 @@ void Monumento::setTitle(const string& title) {
 bool Monumento::operator==(Monumento m) {
 	return this->getLat() == m.getLat() && this->getLon() == m.getLon();
 }
+
+
 
 int Monumento::compare(Monumento m) {
 	int i = 0;
