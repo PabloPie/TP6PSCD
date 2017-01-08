@@ -94,12 +94,13 @@ int Monumento::compare(Monumento m) {
 	if (!this->icono.compare(m.icono) && !this->icono.empty()) {
 		i++;
 	}
+        /*
 	if (this->lat == m.lat && this->lat != -200) {
 		i++;
 	}
 	if (this->lon == m.lon && this->lat != -200) {
 		i++;
 	}
+        */
 	return i;
-
 }
