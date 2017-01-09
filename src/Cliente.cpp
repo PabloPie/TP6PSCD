@@ -50,12 +50,41 @@ string generarPeticion(int& contador, bool* correcto,string* termino){
     return peticion;
 }
 
+//CAMBIO: Creo que no se pasa asi
+int elegirMonumento(array<string>& m){
+    int respuesta;
+    char c;
+    bool continuar = true;
+    while(continuar){
+        cout<<"¿Quiere elegir un restaurante cercano? (Y/N): "<<flush;
+        cin>>c;
+        if(c == 'Y'){
+            for(int i=0; i<m.size(); i++){
+                cout<< to_string(i+1) + ". " + m[i] +".\n";
+            }
+            cout<<"Elija la URL del monumento: "<<flush
+            cin>>respuesta;
+            respuesta--;
+            continuar = false;
+        }
+        else if(c == 'N'){
+            respuesta = -1;
+            continuar = false;
+        }
+        else{
+            cout<<"No le he entendido bien\n";     
+        }
+    }
+    return respuesta;
+}
+
 int main(int argc, char* argv[]) {
     if (argc!=10) {
             cout << "Uso: ./Cliente [direccion] [puerto] [id] [title] [link] [descripcion] [categoria] [fecha] [icono] \n";
             cout<<"Si no quieres añadir uno de los terminos del monumento añadir un \"*\"\n";
             exit(1);
     }
+    srand(time(NULL));
     // Dirección y número donde escucha el proceso servidor
     string SERVER_ADDRESS;
     int SERVER_PORT;
@@ -78,10 +107,10 @@ int main(int argc, char* argv[]) {
     int contador = 0;
     for(int i=0; i<6; i++){
         termino[i]=argv[i+4];
-        correcto=false;
+        correcto[i]=false;
         if(termino[i]!="*"){
             contador++;
-            correcto=true;
+            correcto[i]=true;
         }
     }
     if(contador==0){
@@ -140,19 +169,94 @@ int main(int argc, char* argv[]) {
 
     // Recibimos la respuesta del servidor
     int read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+    if (read_bytes == -1) {
+        cerr << "Error al recibir datos: " << strerror(errno)<< endl;
+         // Cerramos el socket
+        socket.Close(socket_fd);
+        exit(1);
+    }
 
     string aux = buffer;
     // Mostramos la respuesta
     cout << "La respuesta del servidor es: " + aux + "\n";
-    
-    //FALTAN COSAS
-          
-  // Cerramos el socket
-   int error_code = socket.Close(socket_fd);
-   if(error_code == -1){
-        cerr << "Error cerrando el socket: " << strerror(errno) << endl;
-        sleep(5);               //Espermos 5 segundos antes de terminar
-        return error_code;
-   }
+    //CAMBIO: No estoy muy segura de si seria asi
+    if(aux!=-1){    //Si es -1 le hemos pasado mal los datos antes
+        if(aux != "Ningun resultado"){
+            //CAMBIO: Necesitamos el numero de monumentos?
+            array<string, 5> m;
+            bool parse_ok = messageParser(aux, m, "*");
+            if (!parse_ok) {
+                // Cerramos el socket
+                socket.Close(socket_fd);
+                exit(1);
+            }
+            //CAMBIO: mirar si el parser sirve en este caso
+            //CAMBIO: (Elegir monumento) -> "0-4" o (Volver a consultar o END OF SERVICE) ->"-1"
+            int eleccion= elegirMonumento(m);
+            string busqueda;
+            if(eleccion != -1){
+                //Ha elegido un monumento
+                busqueda = "Buscar restaurante " + to_string(eleccion);
+                message = busqueda.c_str();
 
+                //Enviamos la nueva busqueda
+                int send_bytes = socket.Send(socket_fd, message);
+                if(send_bytes == -1){
+                    cerr << "Error al enviar datos: " << strerror(errno) << endl;
+                    // Cerramos el socket
+                    socket.Close(socket_fd);
+                    exit(1);
+                }
+                //Recibimos la URL del restaurante
+                read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+                if (read_bytes == -1) {
+                    cerr << "Error al recibir datos: " << strerror(errno)<< endl;
+                     // Cerramos el socket
+                    socket.Close(socket_fd);
+                    exit(1);
+                }
+                string restaurante = buffer;
+                //CAMBIO: abrir pagina del restaurante
+                //Mostramos la respuesta
+                cout << "La URL del restaurante es: " + restaurante + "\n";
+            }
+            
+            //CAMBIO: Volver a consultar o END OF SERVICE
+            if(rand()%3 == 0){ //END OF SERVICE
+                peticion = "END OF SERVICE";
+                message = peticion.c_str();
+
+                //Enviamos la peticion de acabar la comunicacion
+                int send_bytes = socket.Send(socket_fd, message);
+                if(send_bytes == -1){
+                    cerr << "Error al enviar datos: " << strerror(errno) << endl;
+                    // Cerramos el socket
+                    socket.Close(socket_fd);
+                    exit(1);
+                }
+                //Recibimos el precio de las consultas realizadas
+                read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
+                if (read_bytes == -1) {
+                   cerr << "Error al recibir datos: " << strerror(errno)<< endl;
+                    // Cerramos el socket
+                   socket.Close(socket_fd);
+                   exit(1);
+                }
+                string precio = buffer;
+                //Mostramos la respuesta
+                cout << "El precio por las consultas realizadas es de: " + precio + "\n";
+                //CAMBIO: Las consultas estarían en un bucle, indicar que sale de este para cerrar el socket
+            }
+        }
+         // Cerramos el socket
+        int error_code = socket.Close(socket_fd);
+        if(error_code == -1){
+             cerr << "Error cerrando el socket: " << strerror(errno) << endl;
+             sleep(5);               //Espermos 5 segundos antes de terminar
+             return error_code;
+        }
+    }
+    else{
+        cout<<"No le hemos enviado bien el monumento\n";
+    }
 }
