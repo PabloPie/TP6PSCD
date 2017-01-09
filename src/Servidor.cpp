@@ -117,16 +117,23 @@ void atenderCliente(int cliente, Socket &sck) {
 	while (!out) {
 		// Recibimos el mensaje del cliente
 		int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
-		if (rcv_bytes == -1) {
-			cerr << "Error al recibir datos: " << strerror(errno) << endl;
-			// Cerramos la conexión con el cliente
-			sck.Close(cliente);
+				if (rcv_bytes == -1) {
+					cerr << "Error al recibir datos: " << strerror(errno) << endl;
+					// Cerramos la conexión con el cliente
+					sck.Close(cliente);
 		}
 
 		if (buffer == MENS_FIN) {
 			out = true;
 		} else {
 			cout << "Mensaje recibido: '" << buffer << "'" << endl;
+
+			int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
+			if (rcv_bytes == -1) {
+				cerr << "Error al recibir datos: " << strerror(errno) << endl;
+				// Cerramos la conexión con el cliente
+				sck.Close(cliente);
+			}
 
 			//Parseamos el mensaje:
 			//titulo*link*descripcion*categoria*fecha*icono*lat*lon*idusuario

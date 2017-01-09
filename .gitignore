@@ -87,3 +87,5 @@ local.properties
 
 # Code Recommenders
 .recommenders/
+/Debug
+/Release
