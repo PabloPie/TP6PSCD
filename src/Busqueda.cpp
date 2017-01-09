@@ -22,7 +22,7 @@ int posDeReemplazo(int* c, int n) {
 	return pos;
 }
 //TODO: cambiar algoritmo de ordenacion por std::sort y arreglar parametros de entrada
-int busquedaMonumento(Monumento* m, Monumento* resultado, Monumento& a, int n,
+int busquedaMonumento(const vector<Monumento>& m, vector<Monumento> resultado, Monumento& a, int n,
 		int n2) {
 	int c[n2];
 	for (int i = 0; i < n2; i++) {
@@ -64,6 +64,7 @@ int busquedaMonumento(Monumento* m, Monumento* resultado, Monumento& a, int n,
 			i++;
 		}
 	}
+        return numElementos;
 }
 
 //Función que calcula la distancia entre dos coordenadas del plano cartesiano
