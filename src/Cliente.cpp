@@ -158,7 +158,7 @@ int main(int argc, char* argv[]) {
 				cout << "No puede introducir una cadena vacía.\n";
 				i--; //Para repetir la pregunta
 			}
-			if (termino[i] != "*") { //Si hay alg�n t�rmino
+			else if (termino[i] != "*") { //Si hay alg�n t�rmino
 				contador++;
 				correcto[i] = true;
 			}
