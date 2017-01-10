@@ -302,6 +302,7 @@ int main(int argc, char* argv[]) {
 					exit(1);
 				}
 				//Recibimos el precio de las consultas realizadas
+				cadena="";
 				int read_bytes = socket.Recv(socket_fd, cadena, MESSAGE_SIZE);
 				if (read_bytes == -1) {
 					cerr << "Error al recibir datos: " << strerror(errno)
@@ -310,7 +311,7 @@ int main(int argc, char* argv[]) {
 					socket.Close(socket_fd);
 					exit(1);
 				}
-				string precio = buffer;
+				string precio = cadena;
 				//Mostramos la respuesta
 				cout
 						<< "El precio por las consultas realizadas es de: "
