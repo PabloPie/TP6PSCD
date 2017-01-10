@@ -37,7 +37,7 @@ int busquedaMonumento(const vector<Monumento>& m, array<Monumento,5>& resultado,
 	while (i < m.size() && minCoincidencias != 5) {
 		coincidencias = a.compare(m[i]);
 		if (coincidencias > minCoincidencias) {
-			cout << "Entro en if" <<endl;
+			c[reemplazo] = coincidencias;
 			resultado[reemplazo] = m[i];
 			reemplazo = posDeReemplazo(c, resultado.size());
 			minCoincidencias = c[reemplazo];
