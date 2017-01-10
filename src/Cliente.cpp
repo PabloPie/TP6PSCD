@@ -52,7 +52,7 @@ string generarPeticion(int& contador, bool* correcto,string* termino){
 }
 
 //CAMBIO: Creo que no se pasa asi
-int elegirMonumento(array<string>& m){
+int elegirMonumento(){
     int respuesta;
     char c;
     bool continuar = true;
@@ -60,13 +60,8 @@ int elegirMonumento(array<string>& m){
         cout<<"¿Quiere elegir un restaurante cercano? (Y/N): "<<flush;
         cin>>c;
         if(c == 'Y'){
-            for(int i=0; i<m.size(); i++){
-                cout<< to_string(i+1) + ". " + m[i] +".\n";
-            }
-            cout<<"Elija la URL del monumento: "<<flush;
-            cin>>respuesta;
-            respuesta--;
-            continuar = false;
+        	respuesta=0;
+            continuar=false;
         }
         else if(c == 'N'){
             respuesta = -1;
@@ -77,6 +72,31 @@ int elegirMonumento(array<string>& m){
         }
     }
     return respuesta;
+}
+
+bool messageParser(string buffer, array<string, 5> &url, array<string,5>& nom, string delimiter) {
+	// 8 terminos y id cliente: titulo*link*...*idcliente
+	int i = 0;
+	size_t pos = 0;
+	string token;
+	while ((pos = buffer.find_first_of(delimiter)) != string::npos) {
+		if (i > url.size()) {
+			return false;
+		}
+		token = buffer.substr(0, pos);
+		url[i] = token;
+		if (i > nom.size()) {
+			return false;
+		}
+		buffer.erase(0, pos + 1);
+		pos = buffer.find_first_of(delimiter);
+		if(pos!=string::npos){
+			token = buffer.substr(0, pos);
+			nom[i] = token;
+		}
+		i++;
+	}
+	return true;
 }
 
 int main(int argc, char* argv[]) {
@@ -130,16 +150,7 @@ int main(int argc, char* argv[]) {
     string cadena;
     bool out=false;
     while(!out){
-    	cout << "Inserte la cadena END OF SERVICE si desea terminar la sesi�n. En caso contrario escriba OK. \n";
-    	scanf("%d",cadena);
-    	cout << "\n";
-    	if(cadena == "END OF SERVICE"){
-    		out=true;
-    	}
-    	else if(cadena != "OK"){
-    		cout << "Cadena incorrecta. Vuelva a intentarlo.\n";
-    	}
-    	else{
+
     		int send_bytes = socket.Send(socket_fd, cadena);
 			if(send_bytes == -1)
 			{
@@ -203,23 +214,37 @@ int main(int argc, char* argv[]) {
 			// Mostramos la respuesta
 			cout << "La respuesta del servidor es: " + aux + "\n";
 
-			if(aux!=-1){    //Si es -1 le hemos pasado mal los datos antes
+			if(aux!="-1"){    //Si es -1 le hemos pasado mal los datos antes
 				if(aux != "Ningun resultado"){
-					//CAMBIO: Necesitamos el numero de monumentos?
-					array<string, 5> m;
-					bool parse_ok = messageParser(aux, m, "*");
+					array<string, 5> URL;
+					array<string, 5> nom;
+					bool parse_ok = messageParser(aux, URL, nom, "*");
 					if (!parse_ok) {
+						cerr << "Error al recibir datos." << endl;
 						// Cerramos el socket
 						socket.Close(socket_fd);
 						exit(1);
 					}
-					//CAMBIO: mirar si el parser sirve en este caso
-					//CAMBIO: (Elegir monumento) -> "0-4" o (Volver a consultar o END OF SERVICE) ->"-1"
-					int eleccion= elegirMonumento(m);
-					string busqueda;
+					for(int i=0;i<URL.size();i++){
+						string cmd("firefox" + URL[i]);
+						//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
+						int resCall = system(cmd.c_str());
+						if(resCall != 0){
+							 cerr << "Ha habido algún problema al abrir el navegador" << endl;
+							 return 1;
+						}
+					}
+					int eleccion= elegirMonumento();
 					if(eleccion != -1){
+						string busqueda;
+						cout << "Elija una URL para obtener el restaurante mas cercano al monumento:" <<endl;
+
+						for(int i=0; i < nom.size();i++){
+							cout << to_string(i) << ". " << nom[i] << "\n";
+						}
 						//Ha elegido un monumento
-						busqueda = "Buscar restaurante " + to_string(eleccion);
+						cin >> eleccion;
+						busqueda = to_string(eleccion);
 						message = busqueda.c_str();
 
 						//Enviamos la nueva busqueda
@@ -230,7 +255,7 @@ int main(int argc, char* argv[]) {
 							socket.Close(socket_fd);
 							exit(1);
 						}
-						//Recibimos la URL del restaurante
+						//Recibimos la Lat y Lon del restaurante
 						read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
 						if (read_bytes == -1) {
 							cerr << "Error al recibir datos: " << strerror(errno)<< endl;
@@ -239,44 +264,52 @@ int main(int argc, char* argv[]) {
 							exit(1);
 						}
 						string restaurante = buffer;
-						//CAMBIO: abrir pagina del restaurante
 						//Mostramos la respuesta
-						cout << "La URL del restaurante es: " + restaurante + "\n";
-					}
+						string lat,lon;
+						lat=restaurante.substr(0,restaurante.find_first_of(';'));
+						lon=restaurante.substr(restaurante.find_first_of(';')+1);
 
-					//CAMBIO: Volver a consultar o END OF SERVICE
-					if(rand()%3 == 0){ //END OF SERVICE
-						peticion = "END OF SERVICE";
-						message = peticion.c_str();
 
-						//Enviamos la peticion de acabar la comunicacion
-						int send_bytes = socket.Send(socket_fd, message);
-						if(send_bytes == -1){
-							cerr << "Error al enviar datos: " << strerror(errno) << endl;
-							// Cerramos el socket
-							socket.Close(socket_fd);
-							exit(1);
+						string cmd("firefox https://www.google.com/maps/place/"+to_string(lat)+","+to_string(lon));
+						//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
+						int resCall = system(cmd.c_str());
+						if(resCall != 0){
+							 cerr << "Ha habido algún problema al abrir el navegador" << endl;
+							 return 1;
 						}
-						//Recibimos el precio de las consultas realizadas
-						read_bytes = socket.Recv(socket_fd, buffer, MESSAGE_SIZE);
-						if (read_bytes == -1) {
-						   cerr << "Error al recibir datos: " << strerror(errno)<< endl;
-							// Cerramos el socket
-						   socket.Close(socket_fd);
-						   exit(1);
-						}
-						string precio = buffer;
-						//Mostramos la respuesta
-						cout << "El precio por las consultas realizadas es de: " + precio + "\n";
-						//CAMBIO: Las consultas estarían en un bucle, indicar que sale de este para cerrar el socket
 					}
+				}
+				cout << "Si desea finalizar la ejecuci�n escriba TERMINAR, en caso contrario escriba OK:	";
+				cin >> cadena;
+				if(cadena == "TERMINAR"){
+					out=true;
+					cadena = "END OF SERVICE"
+					int send_bytes = socket.Send(socket_fd, cadena);
+				  	if(send_bytes == -1)
+				  	{
+				  		cerr << "Error al enviar datos: " << strerror(errno) << endl;
+				  		// Cerramos el socket
+				  		socket.Close(socket_fd);
+				  		exit(1);
+				  	}
+				  	//Recibimos el precio de las consultas realizadas
+				  	int read_bytes = socket.Recv(socket_fd, cadena, MESSAGE_SIZE);
+				  	if (read_bytes == -1) {
+				  		cerr << "Error al recibir datos: " << strerror(errno)<< endl;
+				  		// Cerramos el socket
+				  		socket.Close(socket_fd);
+				  		exit(1);
+				  	}
+				  	string precio = buffer;
+				  	//Mostramos la respuesta
+				  	cout << "El precio por las consultas realizadas es de: " + precio + "\n";
 				}
 			}
 			else{
 				cout<<"No le hemos enviado bien el monumento\n";
 			}
     	}
-    }
+
     // Cerramos el socket
 	int error_code = socket.Close(socket_fd);
 	if(error_code == -1){

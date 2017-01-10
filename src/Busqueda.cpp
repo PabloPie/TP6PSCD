@@ -22,10 +22,9 @@ int posDeReemplazo(int* c, int n) {
 	return pos;
 }
 //TODO: cambiar algoritmo de ordenacion por std::sort y arreglar parametros de entrada
-int busquedaMonumento(const vector<Monumento>& m, vector<Monumento> resultado, Monumento& a, int n,
-		int n2) {
-	int c[n2];
-	for (int i = 0; i < n2; i++) {
+int busquedaMonumento(const vector<Monumento>& m, array<Monumento,5>& resultado, Monumento& a) {
+	int c[resultado.size()];
+	for (int i = 0; i < resultado.size(); i++) {
 		c[i] = 0;
 	}
 	int numElementos = 0;
@@ -33,11 +32,11 @@ int busquedaMonumento(const vector<Monumento>& m, vector<Monumento> resultado, M
 	int reemplazo = 0;
 	int coincidencias;
 	int i = 0;
-	while (i < n && minCoincidencias != 5) {
+	while (i < m.size() && minCoincidencias != 5) {
 		coincidencias = m[i].compare(a);
 		if (coincidencias > minCoincidencias) {
 			resultado[reemplazo] = m[i];
-			reemplazo = posDeReemplazo(c, n2);
+			reemplazo = posDeReemplazo(c, resultado.size());
 			minCoincidencias = c[reemplazo];
 			if (numElementos < 5) {
 				numElementos++;
@@ -96,15 +95,5 @@ Restaurante BusquedaRestauranteCerc(const Monumento& m,
 		}
 	}
 	return res;
-	/*Parte de otra funci�n
-	 string cmd("firefox https://www.google.com/maps/place/"+to_string(latRest)+","+to_string(lonRest));
-	 //"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
-	 int resCall = system(cmd.c_str());
-	 if(resCall != 0){
-	 cerr << "Ha habido algún problema al abrir el navegador" << endl;
-	 return 1;
-	 }else{
-	 return 0;
-	 }*/
 }
 

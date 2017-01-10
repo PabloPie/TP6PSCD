@@ -3,7 +3,7 @@
 
 #include "Restaurante.h"
 #include "Monumento.h"
-#include <vector>
+#include <array>
 
 /*
  * Pre: c != null y n<= que la longitud de c.
@@ -21,7 +21,7 @@ int posDeReemplazo (int* c, int n);
  * indice de proximidad al Monumento a, ordenados de mayor a menor.
  * Devuelve el número de elementos encontrados. 
  */
-int busquedaMonumento(Monumento* m,Monumento* resultado, Monumento& a, int n, int n2);
+int busquedaMonumento(const vector<Monumento>& m,array<Monumento,5>& resultado, Monumento& a);
 
 Restaurante BusquedaRestauranteCerc(const Monumento& m,const vector<Restaurante>& r);
 
