@@ -288,11 +288,12 @@ int main(int argc, char* argv[]) {
 			}
 			cout
 					<< "Si desea finalizar la ejecución escriba TERMINAR, en caso contrario escriba OK:	";
-			getline(cin, cadena);
-			if (cadena == "TERMINAR") {
+			string prueba;
+			cin >> prueba;
+			if (prueba == "TERMINAR") {
 				out = true;
-				cadena = "END OF SERVICE";
-				int send_bytes = socket.Send(socket_fd, cadena);
+				prueba = "END OF SERVICE";
+				int send_bytes = socket.Send(socket_fd, prueba);
 				if (send_bytes == -1) {
 					cerr << "Error al enviar datos: " << strerror(errno)
 							<< endl;
