@@ -86,7 +86,6 @@ int main(int argc, char* argv[]) {
 
 	int con;	//Cuenta numero de conexiones totales
 	inicializarDatos();	//Inicializamos los datos
-	prueba();
 	bool fin = false;
 	while (!fin) {
 		int client_fd = socket.Accept();
@@ -159,6 +158,7 @@ void atenderCliente(int cliente, Socket &sck) {
 			string msg;
 			Restaurante r;
 			array<Monumento, 5> mon_seleccionados;
+			cerr << "Buscando monumentos..." << endl;
 			int resultado = busquedaMonumento(monumentos, mon_seleccionados, m);
 			//Si no hay resultados
 			if (resultado == 0) {
@@ -185,7 +185,6 @@ void atenderCliente(int cliente, Socket &sck) {
 					sck.Close(cliente);
 					exit(1);
 				}
-
 				//Recibimos el número de monumento que quiere
 				int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
 				if (rcv_bytes == -1) {
@@ -196,7 +195,7 @@ void atenderCliente(int cliente, Socket &sck) {
 				}
 				if (buffer != "0") {
 					//Seleccionamos el monumento
-					Monumento m1 = mon_seleccionados[stoi(buffer)];
+					Monumento m1 = mon_seleccionados[stoi(buffer)-1];
 					//Buscamos el restaurante mas cercano
 					r = BusquedaRestauranteCerc(m1, restaurantes);
 					//lat;lon
