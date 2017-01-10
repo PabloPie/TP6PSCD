@@ -5,6 +5,7 @@
  */
 #include "../headers/Busqueda.h"
 #include <math.h>
+#include <iostream>
 
 
 using namespace std;
@@ -22,7 +23,7 @@ int posDeReemplazo(int* c, int n) {
 	}
 	return pos;
 }
-//TODO: cambiar algoritmo de ordenacion por std::sort y arreglar parametros de entrada
+
 int busquedaMonumento(const vector<Monumento>& m, array<Monumento,5>& resultado, const Monumento& a) {
 	int c[resultado.size()];
 	for (int i = 0; i < resultado.size(); i++) {
@@ -34,8 +35,9 @@ int busquedaMonumento(const vector<Monumento>& m, array<Monumento,5>& resultado,
 	int coincidencias;
 	int i = 0;
 	while (i < m.size() && minCoincidencias != 5) {
-		coincidencias = m[i].compare(a);
+		coincidencias = a.compare(m[i]);
 		if (coincidencias > minCoincidencias) {
+			cout << "Entro en if" <<endl;
 			resultado[reemplazo] = m[i];
 			reemplazo = posDeReemplazo(c, resultado.size());
 			minCoincidencias = c[reemplazo];

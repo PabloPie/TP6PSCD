@@ -19,7 +19,7 @@ const string TERMINOS[] {"Nombre","URL","Descripcion","Categoria","Fecha"};
 void elegirTerminos(int& contador, bool* correcto){
     int tabla [contador];
     int borrar;
-   
+
     while(contador>5){
         int num = 1;
         int i = 0;
@@ -44,9 +44,10 @@ string generarPeticion(int& contador, bool* correcto,string* termino){
     string peticion = "";
     while(i<contador){
         if(correcto[i]){
-            peticion = peticion + termino[i];
+            peticion = peticion + termino[i]+"*";
         }
         peticion=peticion + "*";
+        i++;
     }
     return peticion;
 }
@@ -67,7 +68,7 @@ int elegirMonumento(){
             continuar = false;
         }
         else{
-            cout<<"No le he entendido bien\n";     
+            cout<<"No le he entendido bien\n";
         }
     }
     return respuesta;
@@ -109,13 +110,13 @@ int main(int argc, char* argv[]) {
     string SERVER_ADDRESS;
     int SERVER_PORT;
     string id;
-    
+
     SERVER_ADDRESS = argv[1];
     SERVER_PORT = atoi(argv[2]);
-    
+
     cout << SERVER_ADDRESS + "\n";
     cout << to_string(SERVER_PORT) + "\n";
-    
+
     // Creación del socket con el que se llevará a cabo
     // la comunicación con el servidor.
     Socket socket(SERVER_ADDRESS, SERVER_PORT);
@@ -149,11 +150,11 @@ int main(int argc, char* argv[]) {
     bool out=false;
     while(!out){
         for(int i=0; i<6; i++){
-                cout << "Inserte"<< posibilidades[i] <<"( * si no desea buscar "<< posibilidades[i] <<"): ";
-                scanf("%100s",termino[i]);
+                cout << "Inserte "<< posibilidades[i] <<"( * si no desea buscar "<< posibilidades[i] <<"): ";
+                getline(cin,termino[i]);
                 cout << "\n";
                 correcto[i]=false;
-                if(termino[i].find_first_not_of(" \t")==string::npos){	//El usuario no ha introducido nada
+                if(termino[i].find_first_not_of(' ')==string::npos){	//El usuario no ha introducido nada
                         cout << "No puede introducir una cadena vacía.\n";
                         i--; //Para repetir la pregunta
                 }
@@ -162,17 +163,18 @@ int main(int argc, char* argv[]) {
                         correcto[i]=true;
                 }
         }
+        for (string s : termino){
+        	cout<<s<<endl;
+        }
         if(contador==0){
                 cerr << "No hay suficientes términos para hacer la búsqueda: " << strerror(errno) << endl;
                 exit(1);
         }
         else if(contador>5){
-                elegirTerminos(ref(contador),correcto);
+                elegirTerminos(contador,correcto);
         }
 
-        contador = 0;
-
-        string peticion = generarPeticion(ref(contador),correcto,termino) + id;
+        string peticion = generarPeticion(contador,correcto,termino) + id;
         cout << "Enviando peticion al servidor: " + peticion + "\n";
         message = peticion.c_str();
 
@@ -267,8 +269,8 @@ int main(int argc, char* argv[]) {
                     }
                 }
             }
-            cout << "Si desea finalizar la ejecuci�n escriba TERMINAR, en caso contrario escriba OK:	";
-            cin >> cadena;
+            cout << "Si desea finalizar la ejecución escriba TERMINAR, en caso contrario escriba OK:	";
+            getline(cin,cadena);
             if(cadena == "TERMINAR"){
                     out=true;
                     cadena = "END OF SERVICE";

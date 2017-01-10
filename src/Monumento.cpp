@@ -12,8 +12,7 @@ Monumento::Monumento(string title, string link, string descripcion,
 	this->descripcion = descripcion;
 	this->categoria = categoria;
 	this->fecha = fecha;
-	this->icono = icono,
-	this->lat = lat;
+	this->icono = icono, this->lat = lat;
 	this->lon = lon;
 }
 
@@ -81,40 +80,35 @@ void Monumento::setTitle(const string& title) {
 	this->title = title;
 }
 
-bool Monumento::operator==(const Monumento &m) const{
+bool Monumento::operator==(const Monumento &m) const {
 	return this->getLat() == m.getLat() && this->getLon() == m.getLon();
 }
 
-
-
-int Monumento::compare(const Monumento &m) const{
+int Monumento::compare(const Monumento &m) const {
 	int i = 0;
-	if (!this->title.compare(m.title) && !this->title.empty()) {
+
+	if (!this->title.empty()
+			&& (m.getTitle().find(this->title)) != string::npos) {
 		i++;
 	}
-	if (!this->link.compare(m.link) && !this->link.empty()) {
+	if (!this->link.empty() && (m.getURL().find(this->link)) != string::npos) {
 		i++;
 	}
-	if (!this->descripcion.compare(m.descripcion)
-			&& !this->descripcion.empty()) {
+	if (!this->descripcion.empty()
+			&& (m.getDescripcion().find(this->descripcion)) != string::npos) {
 		i++;
 	}
-	if (!this->categoria.compare(m.categoria) && !this->categoria.empty()) {
+	if (!this->categoria.empty()
+			&& (m.getCategoria().find(this->categoria)) != string::npos) {
 		i++;
 	}
-	if (!this->fecha.compare(m.fecha) && !this->fecha.empty()) {
+	if (!this->fecha.empty()
+			&& (m.getDate().find(this->fecha)) != string::npos) {
 		i++;
 	}
-	if (!this->icono.compare(m.icono) && !this->icono.empty()) {
+	if (!this->icono.empty()
+			&& (m.getIcon().find(this->icono)) != string::npos) {
 		i++;
 	}
-        /*
-	if (this->lat == m.lat && this->lat != -200) {
-		i++;
-	}
-	if (this->lon == m.lon && this->lat != -200) {
-		i++;
-	}
-        */
 	return i;
 }

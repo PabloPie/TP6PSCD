@@ -7,6 +7,7 @@
 
 SRCDIR := src
 BUILDDIR := build
+DATADIR := datos
 TARGETS := bin/Servidor
 TARGETC := bin/Cliente
 CC := g++
@@ -35,6 +36,7 @@ $(TARGETS): $(OBJECTS)
 	@echo " $(CC) $^ -o $(TARGETS) $(LIB)";$(CC) $^ -o $(TARGETS) $(LIB)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+	@mkdir -p $(DATADIR)
 	@mkdir -p $(BUILDDIR)
 	@echo " $(CC) $(CFLAGS) -c -o $@ $<";$(CC) $(CFLAGS) -c -o $@ $<
 

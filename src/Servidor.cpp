@@ -42,8 +42,9 @@ vector<Monumento> monumentos;
 //Declaración funciones privadas
 void atenderCliente(int cliente, Socket &sck);
 void inicializarDatos();
-void pruebas();
-bool messageParser(string buffer, array<string, 9> &info, string delimiter);
+void prueba();
+bool messageParser(const string &buffer, array<string, 6> &info,
+		string delimiter);
 
 //-------------------------------------------------------------
 int main(int argc, char* argv[]) {
@@ -85,6 +86,7 @@ int main(int argc, char* argv[]) {
 
 	int con;	//Cuenta numero de conexiones totales
 	inicializarDatos();	//Inicializamos los datos
+	prueba();
 	bool fin = false;
 	while (!fin) {
 		int client_fd = socket.Accept();
@@ -140,8 +142,8 @@ void atenderCliente(int cliente, Socket &sck) {
 			cout << "Mensaje recibido: '" << buffer << "'" << endl;
 
 			//Parseamos el mensaje:
-			//titulo*link*descripcion*categoria*fecha*icono*lat*lon*idusuario
-			array<string, 9> info;
+			//titulo*link*descripcion*categoria*fecha*icono
+			array<string, 6> info;
 			bool parse_ok = messageParser(buffer, info, "*");
 			if (!parse_ok) {
 				cout << "Error, mensaje recibido no respeta formato." << endl;
@@ -149,12 +151,9 @@ void atenderCliente(int cliente, Socket &sck) {
 				sck.Close(cliente);
 				exit(1);
 			}
-			//TODO: crear función para procesado de la petición?
 			//Creamos un monumento con la info recibida
-			double lat = atof(info[6].c_str());
-			double lon = atof(info[7].c_str());
 			Monumento m(info[0], info[1], info[2], info[3], info[4], info[5],
-					atof(info[6].c_str()), atof(info[7].c_str()));
+					-200, -200);
 
 			//Buscamos con los datos que nos da el cliente
 			string msg;
@@ -164,7 +163,6 @@ void atenderCliente(int cliente, Socket &sck) {
 			//Si no hay resultados
 			if (resultado == 0) {
 				msg = "Ningun resultado";
-				//Enviamos los monumentos
 				int send_bytes = sck.Send(cliente, msg);
 				if (send_bytes == -1) {
 					cerr << "Error al enviar datos: " << strerror(errno)
@@ -225,13 +223,15 @@ void atenderCliente(int cliente, Socket &sck) {
 	}
 }
 
-bool messageParser(string buffer, array<string, 9> &info, string delimiter) {
-	// 8 terminos y id cliente: titulo*link*...*idcliente
+bool messageParser(const string &buf, array<string, 6> &info,
+		string delimiter) {
+	// 6 terminos y id cliente: titulo*link*...
 	int i = 0;
 	size_t pos = 0;
+	string buffer = buf;
 	string token;
 	while ((pos = buffer.find(delimiter)) != string::npos) {
-		if (i > info.size()) {
+		if (i > info.size() - 1) {
 			return false;
 		}
 		token = buffer.substr(0, pos);
@@ -239,7 +239,6 @@ bool messageParser(string buffer, array<string, 9> &info, string delimiter) {
 		i++;
 		buffer.erase(0, pos + 1);
 	}
-	info[8] = buffer;
 	return true;
 }
 
@@ -256,34 +255,59 @@ void inicializarDatos() {
 
 }
 
-void pruebas() {
-	char c = '$';
-	int num = 0;
-	for (Monumento m : monumentos) {
-		if (m.getTitle().find(c) != std::string::npos) {
-			cout << m.getTitle() << endl;
-			num++;
-		}
-		if (m.getURL().find(c) != std::string::npos) {
-			cout << m.getURL() << endl;
-			num++;
-		}
-		if (m.getDescripcion().find(c) != std::string::npos) {
-			cout << m.getDescripcion() << endl;
-			num++;
-		}
-		if (m.getCategoria().find(c) != std::string::npos) {
-			cout << m.getCategoria() << endl;
-			num++;
-		}
-		if (m.getDate().find(c) != std::string::npos) {
-			cout << m.getDate() << endl;
-			num++;
-		}
-		if (m.getIcon().find(c) != std::string::npos) {
-			cout << m.getIcon() << endl;
-			num++;
+void prueba() {
+	array<string, 6> info;
+	bool ok = messageParser("Goya******", info, "*");
+	//cout << ok << endl;
+
+	Monumento m(info[0], info[1], info[2], info[3], info[4], info[5], -200,	-200);
+	for(Monumento m1 : monumentos){
+		if(m.compare(m1) > 0){
+			cout << m1.getTitle() << endl;
 		}
 	}
-	cout << num << endl;
+	/*cout << m.getTitle() << endl;
+	cout << m.getURL() << endl;
+	cout << m.getDescripcion() << endl;
+	cout << m.getIcon() << endl;
+	cout << m.getCategoria() << endl;
+	cout << m.getDate() << endl;*/
+	array<Monumento, 5> mon_seleccionados;
+	int resultado = busquedaMonumento(monumentos, mon_seleccionados, m);
+	//cout << resultado << endl;
+	for(Monumento m:mon_seleccionados){
+		cout << m.getTitle() << endl;
+	}
+
+	exit(100);
+
+	/*char c = '$';
+	 int num = 0;
+	 for (Monumento m : monumentos) {
+	 if (m.getTitle().find(c) != std::string::npos) {
+	 cout << m.getTitle() << endl;
+	 num++;
+	 }
+	 if (m.getURL().find(c) != std::string::npos) {
+	 cout << m.getURL() << endl;
+	 num++;
+	 }
+	 if (m.getDescripcion().find(c) != std::string::npos) {
+	 cout << m.getDescripcion() << endl;
+	 num++;
+	 }
+	 if (m.getCategoria().find(c) != std::string::npos) {
+	 cout << m.getCategoria() << endl;
+	 num++;
+	 }
+	 if (m.getDate().find(c) != std::string::npos) {
+	 cout << m.getDate() << endl;
+	 num++;
+	 }
+	 if (m.getIcon().find(c) != std::string::npos) {
+	 cout << m.getIcon() << endl;
+	 num++;
+	 }
+	 }
+	 cout << num << endl;*/
 }
