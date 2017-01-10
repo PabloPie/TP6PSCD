@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     while(!out){
         for(int i=0; i<6; i++){
                 cout << "Inserte"<< posibilidades[i] <<"( * si no desea buscar "<< posibilidades[i] <<"): ";
-                scanf("%s",termino[i]);
+                scanf("%100s",termino[i]);
                 cout << "\n";
                 correcto[i]=false;
                 if(termino[i].find_first_not_of(" \t")==string::npos){	//El usuario no ha introducido nada
