@@ -17,6 +17,7 @@
 #include "../headers/Restaurante.h"
 #include "../headers/Monumento.h"
 #include "../headers/ImageDownloader.h"
+#include "../headers/Busqueda.h"
 
 using namespace std;
 
@@ -117,10 +118,10 @@ void atenderCliente(int cliente, Socket &sck) {
 	while (!out) {
 		// Recibimos el mensaje del cliente
 		int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
-				if (rcv_bytes == -1) {
-					cerr << "Error al recibir datos: " << strerror(errno) << endl;
-					// Cerramos la conexión con el cliente
-					sck.Close(cliente);
+		if (rcv_bytes == -1) {
+			cerr << "Error al recibir datos: " << strerror(errno) << endl;
+			// Cerramos la conexión con el cliente
+			sck.Close(cliente);
 		}
 
 		if (buffer == MENS_FIN) {
@@ -158,10 +159,10 @@ void atenderCliente(int cliente, Socket &sck) {
 			//Buscamos con los datos que nos da el cliente
 			string msg;
 			Restaurante r;
-			array<Monumento,5> mon_seleccionados;
+			array<Monumento, 5> mon_seleccionados;
 			int resultado = busquedaMonumento(monumentos, mon_seleccionados, m);
 			//Si no hay resultados
-			if (resultado==0) {
+			if (resultado == 0) {
 				msg = "Ningun resultado";
 				//Enviamos los monumentos
 				int send_bytes = sck.Send(cliente, msg);
@@ -195,20 +196,21 @@ void atenderCliente(int cliente, Socket &sck) {
 					// Cerramos la conexión con el cliente
 					sck.Close(cliente);
 				}
-//				if(buffer=="0"){	 NO SE HA ELEGIDO NINGUN MONUMENTO
-				//Seleccionamos el monumento
-				Monumento m1 = mon_seleccionados[stoi(buffer)];
-				//Buscamos el restaurante mas cercano
-				r = BusquedaRestauranteCerc(m1, restaurantes);
-				//lat;lon
-				msg = to_string(r.getLat())+";"+to_string(r.getLon());
-				//Enviamos la posicion del restaurante al cliente
-				int send_bytes = sck.Send(cliente, msg);
-				if (send_bytes == -1) {
-					cerr << "Error al enviar datos: " << strerror(errno)
-							<< endl;
-					sck.Close(cliente);
-					exit(1);
+				if (buffer != "0") {
+					//Seleccionamos el monumento
+					Monumento m1 = mon_seleccionados[stoi(buffer)];
+					//Buscamos el restaurante mas cercano
+					r = BusquedaRestauranteCerc(m1, restaurantes);
+					//lat;lon
+					msg = to_string(r.getLat()) + ";" + to_string(r.getLon());
+					//Enviamos la posicion del restaurante al cliente
+					int send_bytes = sck.Send(cliente, msg);
+					if (send_bytes == -1) {
+						cerr << "Error al enviar datos: " << strerror(errno)
+								<< endl;
+						sck.Close(cliente);
+						exit(1);
+					}
 				}
 				consultas++;
 			}

@@ -14,7 +14,7 @@ using namespace std;
 
 const int MESSAGE_SIZE = 4001; //mensajes de no m√°s 4000 caracteres
 const string MENS_FIN("END OF SERVICE");
-const string TERMINOS {"Nombre","URL","Descripcion","Categoria","Fecha"};
+const string TERMINOS[] {"Nombre","URL","Descripcion","Categoria","Fecha"};
 
 void elegirTerminos(int& contador, bool* correcto){
     int tabla [contador];
@@ -100,7 +100,7 @@ bool messageParser(string buffer, array<string, 5> &url, array<string,5>& nom, s
 }
 
 int main(int argc, char* argv[]) {
-    if (argc!=3) {
+    if (argc<4) {
             cout << "Uso: ./Cliente [direccion] [puerto] [id]\n";
             cout << "Siga los pasos indicados correctamente.\n";
             exit(1);
@@ -142,7 +142,7 @@ int main(int argc, char* argv[]) {
     cout << "Imposible contactar con el servidor \n";
         return socket_fd;
     }
-    string posibilidades[6]={"tÌtulo","URL","descripciÛn","categorÌa","fecha","icono"};
+    string posibilidades[6]={"titulo","URL","descripcion","categoria","fecha","icono"};
     string termino[6];
     bool correcto[6];
     int contador = 0;
@@ -166,16 +166,16 @@ int main(int argc, char* argv[]) {
 				cout << "\n";
 				correcto[i]=false;
 				if(termino[i].find_first_not_of(" \t")==string::npos){	//El usuario no ha introducido nada
-					cout << "No puede introducir una cadena vacÌa.\n";
+					cout << "No puede introducir una cadena vac√≠a.\n";
 					i--; //Para repetir la pregunta
 				}
-				if(termino[i]!="*"){ //Si hay alg˙n tÈrmino
+				if(termino[i]!="*"){ //Si hay algÔøΩn tÔøΩrmino
 					contador++;
 					correcto[i]=true;
 				}
 			}
 			if(contador==0){
-				cerr << "No hay suficientes tÈrminos para hacer la b˙squeda: " << strerror(errno) << endl;
+				cerr << "No hay suficientes t√©rminos para hacer la b√∫squeda: " << strerror(errno) << endl;
 				exit(1);
 			}
 			else if(contador>5){
@@ -189,7 +189,7 @@ int main(int argc, char* argv[]) {
 			message = peticion.c_str();
 
 			//enviamos la peticion
-			int send_bytes = socket.Send(socket_fd, message);
+			send_bytes = socket.Send(socket_fd, message);
 			if(send_bytes == -1)
 			{
 				cerr << "Error al enviar datos: " << strerror(errno) << endl;
@@ -270,7 +270,7 @@ int main(int argc, char* argv[]) {
 						lon=restaurante.substr(restaurante.find_first_of(';')+1);
 
 
-						string cmd("firefox https://www.google.com/maps/place/"+to_string(lat)+","+to_string(lon));
+						string cmd("firefox https://www.google.com/maps/place/"+lat+","+lon);
 						//"system" requiere un "char *", que es lo que nos da el operador "c_str()" de la clase string de C++
 						int resCall = system(cmd.c_str());
 						if(resCall != 0){
@@ -279,11 +279,11 @@ int main(int argc, char* argv[]) {
 						}
 					}
 				}
-				cout << "Si desea finalizar la ejecuciÛn escriba TERMINAR, en caso contrario escriba OK:	";
+				cout << "Si desea finalizar la ejecuciÔøΩn escriba TERMINAR, en caso contrario escriba OK:	";
 				cin >> cadena;
 				if(cadena == "TERMINAR"){
 					out=true;
-					cadena = "END OF SERVICE"
+					cadena = "END OF SERVICE";
 					int send_bytes = socket.Send(socket_fd, cadena);
 				  	if(send_bytes == -1)
 				  	{

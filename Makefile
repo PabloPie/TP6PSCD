@@ -7,21 +7,32 @@
 
 SRCDIR := src
 BUILDDIR := build
-TARGET := bin/Servidor
-
+TARGETS := bin/Servidor
+TARGETC := bin/Cliente
 CC := g++
 
 SRCEXT := cpp
-SOURCES := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
-OBJECTS := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o))
+SOURCES := $(filter-out src/Cliente.cpp, $(shell find $(SRCDIR) -type f -name *.$(SRCEXT)))
+SOURCESC := src/Cliente.cpp src/Socket.cpp
+OBJECTS := $(filter-out src/Cliente.o, $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o)))
+OBJECTSC := build/Cliente.o build/Socket.o
 CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 -I/usr/local/include #-Werror
 LIB :=-pthread -lcurl
 
-all: $(TARGET)
+all: server client
+
+server: $(TARGETS)
+client: $(TARGETC)
+
+$(TARGETC): $(OBJECTSC)
+	@echo " Linking client..."
+	@echo " $(CC) $^ -o $(TARGETC) $(LIB)";$(CC) $^ -o $(TARGETC) $(LIB)
+
+
 # Create the executable
-$(TARGET): $(OBJECTS)
-	@echo " Linking..."
-	@echo " $(CC) $^ -o $(TARGET) $(LIB)";$(CC) $^ -o $(TARGET) $(LIB)
+$(TARGETS): $(OBJECTS)
+	@echo " Linking server..."
+	@echo " $(CC) $^ -o $(TARGETS) $(LIB)";$(CC) $^ -o $(TARGETS) $(LIB)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
@@ -29,6 +40,6 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 
 clean:
 	@echo " Cleaning...";
-	@echo " $(RM) -r $(BUILDDIR) $(TARGET)";rm -r $(BUILDDIR) $(TARGET)
+	@echo " $(RM) -r $(BUILDDIR) $(TARGETS) $(TARGETC)";rm -r $(BUILDDIR) $(TARGETS) $(TARGETC)
 
 .PHONY: clean

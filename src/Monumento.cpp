@@ -81,13 +81,13 @@ void Monumento::setTitle(const string& title) {
 	this->title = title;
 }
 
-bool Monumento::operator==(Monumento m) {
+bool Monumento::operator==(const Monumento &m) const{
 	return this->getLat() == m.getLat() && this->getLon() == m.getLon();
 }
 
 
 
-int Monumento::compare(Monumento m) {
+int Monumento::compare(const Monumento &m) const{
 	int i = 0;
 	if (!this->title.compare(m.title) && !this->title.empty()) {
 		i++;

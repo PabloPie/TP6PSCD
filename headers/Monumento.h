@@ -30,9 +30,9 @@ public:
 	void setTitle(const string& title);
 
 	//Se compara por posición, si la latitud y longitud coinciden, son el mismo
-	bool operator==(Monumento m);
+	bool operator==(const Monumento &m) const;
 	//Devuelve el número de coincidencias entre this y m
-	int compare(Monumento m);
+	int compare(const Monumento &m) const;
 
 private:
 	//Corresponden a los campos del JSON
