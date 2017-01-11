@@ -76,13 +76,7 @@ int main(int argc, char* argv[]) {
 		exit(1);
 	}
         
-        atomic_bool libres_threads[10];			            //array con las posiciones de threads libres
-	bool terminado_threads[10];			                //array con las posiciones de threads terminados a la espera de join
-	// atomic_bool usado_threads[10];			        //array con las posiciones de threads libres
-	for (int k=0; k<10; k++) {
-		libres_threads[k] = true;
-		terminado_threads[k] = true;
-	}
+
 
 	// Listen
         const int MAX_CONNECTIONS = 3;
@@ -133,8 +127,8 @@ int main(int argc, char* argv[]) {
                 if (seguir) {
                     libres_threads[p] = false;
                     terminado_threads[p] = false;
-                    thread t = thread(&atenderCliente, client_fd, ref(socket),ref(seguir));
-                    t.detach();
+                    thread t = thread(&atenderCliente, client_fd, ref(socket),ref(seguir),ref(libres_threads[p]));
+                   // t.detach();
 
 		} else {
 			cerr << "Error en el accept: " << strerror(errno) << endl;
