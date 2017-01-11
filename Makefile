@@ -17,8 +17,10 @@ SOURCES := $(filter-out src/Cliente.cpp, $(shell find $(SRCDIR) -type f -name *.
 SOURCESC := src/Cliente.cpp src/Socket.cpp
 OBJECTS := $(filter-out src/Cliente.o, $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SOURCES:.$(SRCEXT)=.o)))
 OBJECTSC := build/Cliente.o build/Socket.o
-CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 -I/usr/local/include #-Werror
+
+CFLAGS :=-std=c++11 -fmax-errors=1  -I. -O2 -I/usr/local/include -lsockets #-Werror
 LIB :=-pthread -lcurl
+HLIB := -L/usr/local/lib -lm -pthread -lcurl -lsocket -lnsl
 
 all: server client
 
@@ -27,13 +29,13 @@ client: $(TARGETC)
 
 $(TARGETC): $(OBJECTSC)
 	@echo " Linking client..."
-	@echo " $(CC) $^ -o $(TARGETC) $(LIB)";$(CC) $^ -o $(TARGETC) $(LIB)
+	@echo " $(CC) $^ -o $(TARGETC) $(LIB)";$(CC) $^ -o $(TARGETC) $(LIB) #$(HLIB) descomentar para Hendrix
 
 
 # Create the executable
 $(TARGETS): $(OBJECTS)
 	@echo " Linking server..."
-	@echo " $(CC) $^ -o $(TARGETS) $(LIB)";$(CC) $^ -o $(TARGETS) $(LIB)
+	@echo " $(CC) $^ -o $(TARGETS) $(LIB)";$(CC) $^ -o $(TARGETS) $(LIB) #$(HLIB) descomentar para Hendrix
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(DATADIR)

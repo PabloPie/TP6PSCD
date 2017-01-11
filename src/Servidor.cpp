@@ -30,6 +30,11 @@ const int precio = 100;
 const string f_restaurante("datos/restaurantes.json");
 const string f_monumentos("datos/arte.json");
 
+/*Para Hendrix cambiar al directorio propio
+const string f_restaurante("/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/restaurantes.json");
+const string f_monumentos("/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/arte.json");
+*/
+
 char url_monumentos[500] =
 		"http://www.zaragoza.es/georref/json/hilo/verconsulta_Piezas?georss_tag_1=-&georss_materiales=-&georss_tematica=-&georss_barrio=-&georss_epoca=-";
 char url_restaurante[500] =
@@ -293,8 +298,14 @@ bool messageParser(const string &buf, array<string, 6> &info,
 void inicializarDatos() {
 	cout << "Descargando datos..." << endl;
 	ImageDownloader i;
-	i.downloadImage(url_monumentos, "datos/arte.json");
-	i.downloadImage(url_restaurante, "datos/restaurantes.json");
+	/* Para Hendrix cambiar al directorio que sea
+	char c_monumentos[500]= "/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/restaurantes.json";
+	char c_restaurantes[500] = "/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/arte.json";
+	*/
+	char c_monumentos[500]= "datos/restaurantes.json";
+	char c_restaurantes[500] = "datos/arte.json";
+	i.downloadImage(url_monumentos, c_monumentos);
+	i.downloadImage(url_restaurante, c_restaurantes);
 	cout << "Inicializando datos..." << endl;
 	int numMon = obtenerDatos(monumentos, f_monumentos);
 	int numRes = obtenerDatos(restaurantes, f_restaurante);
