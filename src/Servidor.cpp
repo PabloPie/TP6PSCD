@@ -40,7 +40,7 @@ vector<Restaurante> restaurantes;
 vector<Monumento> monumentos;
 
 //Declaración funciones privadas
-void atenderCliente(int cliente, Socket &sck,bool &seguir);
+void atenderCliente(int cliente, Socket &sck,bool &seguir,atomic_bool &threadFinalizado);
 void inicializarDatos();
 void seHaTerminado (bool &seguir, int SERVER_PORT);
 void prueba();
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]) {
     }
 }
 //-------------------------------------------------------------
-void atenderCliente(int cliente, Socket &sck, bool &seguir) {
+void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFinalizado) {
 	int length = 100;
 	string buffer;
 	int consultas = 0;
@@ -274,6 +274,7 @@ void atenderCliente(int cliente, Socket &sck, bool &seguir) {
 		cerr << "Error cerrando el socket del cliente: " << strerror(errno)
 				<< endl;
 	}
+        threadFinalizado = true;
 }
 
 bool messageParser(const string &buf, array<string, 6> &info,
