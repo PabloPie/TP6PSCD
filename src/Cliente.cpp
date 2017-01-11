@@ -1,6 +1,6 @@
 /*
- * Autores:
- * Nip:
+ * Autores: Beatriz Martínez, Santiago Morón, Pablo Piedrafita
+ * Nip: 687943,681417,691812
  * Fecha de entrega: 10/01/2017
  */
 
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
 			getline(cin, termino[i]);
 			cout << "\n";
 			correcto[i] = false;
-			if (termino[i].find_first_not_of(' ') == string::npos) {//El usuario no ha introducido nada
+			if (termino[i].find_first_not_of(" \t") == string::npos) {//El usuario no ha introducido nada
 				cout << "No puede introducir una cadena vacía.\n";
 				i--; //Para repetir la pregunta
 			}

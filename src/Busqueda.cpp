@@ -1,6 +1,6 @@
 /*
- * Autores:
- * Nip:
+ * Autores: Beatriz Martínez, Santiago Morón, Pablo Piedrafita
+ * Nip: 687943,681417,691812
  * Fecha de entrega: 10/01/2017
  */
 #include "../headers/Busqueda.h"
