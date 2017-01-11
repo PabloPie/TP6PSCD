@@ -42,6 +42,7 @@ vector<Monumento> monumentos;
 //Declaración funciones privadas
 void atenderCliente(int cliente, Socket &sck);
 void inicializarDatos();
+void seHaTerminado (bool &seguir, int SERVER_PORT);
 void prueba();
 bool messageParser(const string &buffer, array<string, 6> &info,
 		string delimiter);
@@ -252,6 +253,49 @@ void inicializarDatos() {
 	cout << "Número de monumentos: " << numMon << endl;
 	cout << "Número de restaurantes: " << numRes << endl;
 
+}
+
+/*
+ * Pre: Introducimos por referencia un booleano true;
+ * Post:En el booleano [seguir] gestionamos si debemos o no seguir
+ * escuchando peticiones de los clientes, es decir, nos dice si intentamos
+ * terminar el programa.
+ * En el momento en que introduzcamos por la entrada del programa un caracter
+ * igual a 'X' acabará, si introduciomos otro caracter vuelve a esperar a que
+ * introduzcamos otro caracter.
+ */
+void seHaTerminado (bool &seguir, int SERVER_PORT){
+    char caracter [1];
+    char caracter2 [1] {'X'};
+
+    while(seguir){
+        cin>>caracter;
+        if(strcmp(caracter,caracter2)){
+            seguir=false;
+        }
+    }
+    //creamos una ultima conexion para que el cliente salga del Accept
+    string SERVER_ADDRESS = "localhost";
+    Socket socket(SERVER_ADDRESS, SERVER_PORT);
+
+    const int MAX_ATTEMPS = 10;
+    int count = 0;
+    int socket_fd;
+    do{
+        // Conexión con el servidor
+        socket_fd = socket.Connect();
+        count++;
+
+        // Si error --> esperamos 1 segundo para reconectar
+        if(socket_fd == -1){
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+    } while(socket_fd == -1 && count < MAX_ATTEMPS);
+        // Chequeamos si se ha realizado la conexión
+    if(socket_fd == -1){
+        cout << "Imposible contactar con el servidor,soy el cliente falso \n";
+    }
+    socket.Close(socket_fd);
 }
 
 void prueba() {
