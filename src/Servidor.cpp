@@ -40,7 +40,7 @@ vector<Restaurante> restaurantes;
 vector<Monumento> monumentos;
 
 //Declaración funciones privadas
-void atenderCliente(int cliente, Socket &sck);
+void atenderCliente(int cliente, Socket &sck,bool &seguir);
 void inicializarDatos();
 void seHaTerminado (bool &seguir, int SERVER_PORT);
 void prueba();
@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
 	// Puerto donde escucha el proceso servidor
 	istringstream ss(argv[1]);
 	int SERVER_PORT;
+        bool seguir = true;
 
 	if (!(ss >> SERVER_PORT)) {
 		cerr << "Número no válido " << argv[1]
@@ -74,45 +75,97 @@ int main(int argc, char* argv[]) {
 		cerr << "Error en el bind: " << strerror(errno) << endl;
 		exit(1);
 	}
-
-	// Listen
-	int max_connections = 3;
-	int error_code = socket.Listen(max_connections);
-	if (error_code == -1) {
-		cerr << "Error en el listen: " << strerror(errno) << endl;
-		// Cerramos el socket
-		socket.Close(socket_fd);
-		exit(1);
+        
+        atomic_bool libres_threads[10];			            //array con las posiciones de threads libres
+	bool terminado_threads[10];			                //array con las posiciones de threads terminados a la espera de join
+	// atomic_bool usado_threads[10];			        //array con las posiciones de threads libres
+	for (int k=0; k<10; k++) {
+		libres_threads[k] = true;
+		terminado_threads[k] = true;
 	}
 
-	int con;	//Cuenta numero de conexiones totales
+	// Listen
+        const int MAX_CONNECTIONS = 3;
+        int error_code = socket.Listen(MAX_CONNECTIONS);
+        if(error_code == -1) {
+            cerr << "Error en el listen: " << strerror(errno) << endl;
+            // Cerramos el socket
+            socket.Close(socket_fd);
+            exit(1);
+        }
+        
+        int client_fd;
+        thread t[MAX_CONNECTIONS];								    //contador para generar distintos nombres para las imagenes
+        int i=0;											//contador de conexiones activas
+        int p=0;											//posicion del vector de threads donde se creara el nuevo
+        atomic_bool libres_threads[MAX_CONNECTIONS];			            //array con las posiciones de threads libres
+        bool terminado_threads[MAX_CONNECTIONS];			                //array con las posiciones de threads terminados a la espera de join
+        for (int k=0; k<MAX_CONNECTIONS; k++) {
+                libres_threads[k] = true;
+                terminado_threads[k] = true;
+        }
+
 	inicializarDatos();	//Inicializamos los datos
-	bool fin = false;
-	while (!fin) {
-		int client_fd = socket.Accept();
-		if (client_fd > 0) {
-			cout << "Cliente " << con++ << endl;
-			thread t = thread(&atenderCliente, client_fd, ref(socket));
-			t.detach();
+        thread f (&seHaTerminado,ref(seguir),SERVER_PORT);
+	while (seguir) {
+            i = 0;
+            //antes de aceptar una nueva conexion, comprueba los threads disponibles y elimina hilos acabados
+            for (int k=0; k<MAX_CONNECTIONS; k++) {
+            if (libres_threads[k])  {	
+                if (!terminado_threads[k]) {
+                    t[k].join();
+                    terminado_threads[k] = true;
+                }
+                p=k; //asocia la posicion para el nuevo thread a uno libre
+            }
+            else {
+                i++;
+            }
+        }
+        //aceptara todas las peticiones de cliente mientras tenga abiertas menos de 10 conexiones
+        if (i<MAX_CONNECTIONS){
+            client_fd = socket.Accept();
+            if(client_fd == -1) {
+                cerr << "Error en el accept: " << strerror(errno) << endl;
+                // Cerramos el socket
+                socket.Close(socket_fd);
+            } else {
+                if (seguir) {
+                    libres_threads[p] = false;
+                    terminado_threads[p] = false;
+                    thread t = thread(&atenderCliente, client_fd, ref(socket),ref(seguir));
+                    t.detach();
 
 		} else {
 			cerr << "Error en el accept: " << strerror(errno) << endl;
 		}
+            }
 	}
-	/*// Cerramos el socket del servidor
-	 error_code = socket.Close(socket_fd);
-	 if (error_code == -1) {
-	 cerr << "Error cerrando el socket del servidor: " << strerror(errno)
-	 << endl;
-	 }
-	 // Mensaje de despedida
-	 cout << "Bye bye" << endl;
+        cout << "Quiero Salir\n";
+        f.join();
+        //esperamos a que todos los threads finalicen
+        for (int k=0; k<10; k++) {
+            if (libres_threads[k]) {
+                if (!terminado_threads[k]) {
+                    t[k].join();
+                    cout << "finaliza la comunicacion " + to_string(k) + "\n";
+                }
+            }
+        }
+        // Cerramos el socket del servidor
+         error_code = socket.Close(socket_fd);
+         if (error_code == -1) {
+         cerr << "Error cerrando el socket del servidor: " << strerror(errno)
+         << endl;
+         }
+         // Mensaje de despedida
+         cout << "Bye bye" << endl;
 
-	 return error_code;
-	 */
+         return error_code;
+    }
 }
 //-------------------------------------------------------------
-void atenderCliente(int cliente, Socket &sck) {
+void atenderCliente(int cliente, Socket &sck, bool &seguir) {
 	int length = 100;
 	string buffer;
 	int consultas = 0;
