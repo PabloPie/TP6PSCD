@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 		for (int i = 0; i < 6; i++) {
 			cout << "Inserte " << posibilidades[i] << "( * si no desea buscar "
 					<< posibilidades[i] << "): ";
-			getline(cin, termino[i]);
+			cin >> termino[i];
 			cout << "\n";
 			correcto[i] = false;
 			if (termino[i].find_first_not_of(" \t") == string::npos) {//El usuario no ha introducido nada
@@ -159,8 +159,16 @@ int main(int argc, char* argv[]) {
 				i--; //Para repetir la pregunta
 			}
 			else if (termino[i] != "*") { //Si hay alg�n t�rmino
-				contador++;
-				correcto[i] = true;
+				for(int w=1; w < termino[i].length() ; w++){
+					if(termino[i][w] == '*'){
+						termino[i]=termino[i].substr(0,w)+termino[i].substr(w+1);
+						w--;
+					}
+				}
+				if(termino[i] != "*" && termino[i].find_first_not_of(" \t") != string::npos){ 
+					contador++;
+					correcto[i] = true;
+				}
 			}
 		}
 		if (contador == 0) {
@@ -174,6 +182,7 @@ int main(int argc, char* argv[]) {
 		string peticion = generarPeticion(contador, correcto, termino) + id;
 		cout << "Enviando peticion al servidor: " + peticion + "\n";
 		message = peticion.c_str();
+		contador=0;
 
 		//enviamos la peticion
 		int send_bytes = socket.Send(socket_fd, message);
@@ -285,6 +294,17 @@ int main(int argc, char* argv[]) {
 						return 1;
 					}
 				}
+				else{
+					message="0";
+					int send_bytes = socket.Send(socket_fd, message);
+					if (send_bytes == -1) {
+						cerr << "Error al enviar datos: " << strerror(errno)
+								<< endl;
+						// Cerramos el socket
+						socket.Close(socket_fd);
+						exit(1);
+					}
+				}
 			}
 			cout
 					<< "Si desea finalizar la ejecución escriba TERMINAR, en caso contrario escriba OK:	";
@@ -315,7 +335,7 @@ int main(int argc, char* argv[]) {
 				//Mostramos la respuesta
 				cout
 						<< "El precio por las consultas realizadas es de: "
-								+ precio + "\n";
+								+ precio + " centimos\n";
 			}
 		} else {
 			cout << "No le hemos enviado bien el monumento\n";

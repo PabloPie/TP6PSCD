@@ -27,13 +27,15 @@ const string MENS_FIN("END OF SERVICE");
 
 //Constantes del sistema
 const int precio = 100;
+/*
 const string f_restaurante("datos/restaurantes.json");
 const string f_monumentos("datos/arte.json");
-
-/*Para Hendrix cambiar al directorio propio
-const string f_restaurante("/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/restaurantes.json");
-const string f_monumentos("/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/arte.json");
 */
+
+//Para Hendrix cambiar al directorio propio
+const string f_restaurante("/home/a681417/Desktop/tNP_681417_691812_687943/datos/restaurantes.json");
+const string f_monumentos("/home/a681417/Desktop/tNP_681417_691812_687943/datos/arte.json");
+
 
 char url_monumentos[500] =
 		"http://www.zaragoza.es/georref/json/hilo/verconsulta_Piezas?georss_tag_1=-&georss_materiales=-&georss_tematica=-&georss_barrio=-&georss_epoca=-";
@@ -45,7 +47,7 @@ vector<Restaurante> restaurantes;
 vector<Monumento> monumentos;
 
 //Declaración funciones privadas
-void atenderCliente(int cliente, Socket &sck,bool &seguir,atomic_bool &threadFinalizado);
+void atenderCliente(int cliente, Socket &sck,bool &threadFinalizado);
 void inicializarDatos();
 void seHaTerminado (bool &seguir, int SERVER_PORT);
 void prueba();
@@ -97,19 +99,19 @@ int main(int argc, char* argv[]) {
         thread t[MAX_CONNECTIONS];								    //contador para generar distintos nombres para las imagenes
         int i=0;											//contador de conexiones activas
         int p=0;											//posicion del vector de threads donde se creara el nuevo
-        atomic_bool libres_threads[MAX_CONNECTIONS];			            //array con las posiciones de threads libres
+        bool libres_threads[MAX_CONNECTIONS];			            //array con las posiciones de threads libres
         bool terminado_threads[MAX_CONNECTIONS];			                //array con las posiciones de threads terminados a la espera de join
         for (int k=0; k<MAX_CONNECTIONS; k++) {
                 libres_threads[k] = true;
                 terminado_threads[k] = true;
         }
-
+	int numCliente = 0;
 	inicializarDatos();	//Inicializamos los datos
-        thread f (&seHaTerminado,ref(seguir),SERVER_PORT);
+    thread f (&seHaTerminado,ref(seguir),SERVER_PORT);
 	while (seguir) {
-            i = 0;
-            //antes de aceptar una nueva conexion, comprueba los threads disponibles y elimina hilos acabados
-            for (int k=0; k<MAX_CONNECTIONS; k++) {
+        i = 0;
+        //antes de aceptar una nueva conexion, comprueba los threads disponibles y elimina hilos acabados
+        for (int k=0; k<MAX_CONNECTIONS; k++) {
             if (libres_threads[k])  {	
                 if (!terminado_threads[k]) {
                     t[k].join();
@@ -120,51 +122,51 @@ int main(int argc, char* argv[]) {
             else {
                 i++;
             }
-        }
+    	}
         //aceptara todas las peticiones de cliente mientras tenga abiertas menos de 10 conexiones
-        if (i<MAX_CONNECTIONS){
-            client_fd = socket.Accept();
+          if (i<MAX_CONNECTIONS){
+            client_fd = socket.Accept();            
             if(client_fd == -1) {
                 cerr << "Error en el accept: " << strerror(errno) << endl;
                 // Cerramos el socket
                 socket.Close(socket_fd);
             } else {
+				numCliente++;
                 if (seguir) {
+					cout<<"Cliente nuevo: cliente numero "<< numCliente <<endl;
                     libres_threads[p] = false;
                     terminado_threads[p] = false;
-                    thread t = thread(&atenderCliente, client_fd, ref(socket),ref(seguir),ref(libres_threads[p]));
-                   // t.detach();
+                    t[p] = thread(&atenderCliente, client_fd, ref(socket),ref(libres_threads[p]));
+                    //t.detach();
 
-		} else {
-			cerr << "Error en el accept: " << strerror(errno) << endl;
-		}
+                } else {
+                	cout << "Servidor cerrado, no se aceptan peticiones" << endl;
+                }
             }
-	}
+        }
     }
-	 cout << "Quiero Salir\n";
-		f.join();
-		//esperamos a que todos los threads finalicen
-		for (int k=0; k<10; k++) {
-			if (libres_threads[k]) {
-				if (!terminado_threads[k]) {
-					t[k].join();
-					cout << "finaliza la comunicacion " + to_string(k) + "\n";
-				}
+    	cout << "Quiero Salir\n";
+        f.join();
+        //esperamos a que todos los threads finalicen
+        cout<<"Esperando a que finalicen todos los procesos."<<endl;
+        for (int k=0; k<3; k++) {			
+			if(t[k].joinable()){
+               t[k].join();
+               cout << "finaliza la comunicacion " + to_string(k) + "\n";
 			}
-		}
-		// Cerramos el socket del servidor
-		 error_code = socket.Close(socket_fd);
-		 if (error_code == -1) {
-		 cerr << "Error cerrando el socket del servidor: " << strerror(errno)
-		 << endl;
-		 }
-		 // Mensaje de despedida
-		 cout << "Bye bye" << endl;
-
-		 return error_code;
+        }
+        // Cerramos el socket del servidor
+        error_code = socket.Close(socket_fd);
+        if (error_code == -1) {
+	        cerr << "Error cerrando el socket del servidor: " << strerror(errno)
+	        << endl;
+        }
+        // Mensaje de despedida
+        cout << "Bye bye" << endl;
+        return error_code;
 }
 //-------------------------------------------------------------
-void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFinalizado) {
+void atenderCliente(int cliente, Socket &sck,bool &threadFinalizado) {
 	int length = 100;
 	string buffer;
 	int consultas = 0;
@@ -173,9 +175,9 @@ void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFi
 		// Recibimos el mensaje del cliente
 		int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
 		if (rcv_bytes == -1) {
-			cerr << "Error al recibir datos: " << strerror(errno) << endl;
+			cerr << "Error al recibir la peticion: " << strerror(errno) << endl;
 			// Cerramos la conexión con el cliente
-			sck.Close(cliente);
+			break;
 		}
 
 		if (buffer == MENS_FIN) {
@@ -185,10 +187,9 @@ void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFi
 			// Enviamos el resultado final de sus peticiones
 			int send_bytes = sck.Send(cliente, price);
 			if (send_bytes == -1) {
-				cerr << "Error al enviar datos: " << strerror(errno) << endl;
+				cerr << "Error al enviar precio final: " << strerror(errno) << endl;
 				// Cerramos el socket
-				sck.Close(cliente);
-				exit(1);
+				break;
 			}
 		} else {
 			cout << "Mensaje recibido: '" << buffer << "'" << endl;
@@ -199,70 +200,72 @@ void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFi
 			bool parse_ok = messageParser(buffer, info, "*");
 			if (!parse_ok) {
 				cout << "Error, mensaje recibido no respeta formato." << endl;
-				sck.Send(cliente, "-1");
-				sck.Close(cliente);
-				exit(1);
-			}
-			//Creamos un monumento con la info recibida
-			Monumento m(info[0], info[1], info[2], info[3], info[4], info[5],
-					-200, -200);
+				int send_bytes = sck.Send(cliente, "-1");
+				if(send_bytes==-1){
+					cout << "El cliente se ha cerrado, cerrando conexión y saliendo" << endl;
+					break;				
+				}
+			}else{
+				//Creamos un monumento con la info recibida
+				Monumento m(info[0], info[1], info[2], info[3], info[4], info[5],
+						-200, -200);
 
-			//Buscamos con los datos que nos da el cliente
-			string msg;
-			Restaurante r;
-			array<Monumento, 5> mon_seleccionados;
-			cerr << "Buscando monumentos..." << endl;
-			int resultado = busquedaMonumento(monumentos, mon_seleccionados, m);
-			//Si no hay resultados
-			if (resultado == 0) {
-				msg = "Ningun resultado";
-				int send_bytes = sck.Send(cliente, msg);
-				if (send_bytes == -1) {
-					cerr << "Error al enviar datos: " << strerror(errno)
-							<< endl;
-					sck.Close(cliente);
-					exit(1);
-				}
-			} else {
-				msg = "";
-				//Construimos el mensaje para el cliente con los monumentos
-				for (Monumento m : mon_seleccionados) {
-					msg += m.getURL() + '*' + m.getTitle() + '*';
-				}
-
-				//Enviamos los monumentos
-				int send_bytes = sck.Send(cliente, msg);
-				if (send_bytes == -1) {
-					cerr << "Error al enviar datos: " << strerror(errno)
-							<< endl;
-					sck.Close(cliente);
-					exit(1);
-				}
-				//Recibimos el número de monumento que quiere
-				int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
-				if (rcv_bytes == -1) {
-					cerr << "Error al recibir datos: " << strerror(errno)
-							<< endl;
-					// Cerramos la conexión con el cliente
-					sck.Close(cliente);
-				}
-				if (buffer != "0") {
-					//Seleccionamos el monumento
-					Monumento m1 = mon_seleccionados[stoi(buffer)-1];
-					//Buscamos el restaurante mas cercano
-					r = BusquedaRestauranteCerc(m1, restaurantes);
-					//lat;lon
-					msg = to_string(r.getLat()) + ";" + to_string(r.getLon());
-					//Enviamos la posicion del restaurante al cliente
+				//Buscamos con los datos que nos da el cliente
+				string msg;
+				Restaurante r;
+				array<Monumento, 5> mon_seleccionados;
+				int resultado = busquedaMonumento(monumentos, mon_seleccionados, m);
+				//Si no hay resultados
+				if (resultado == 0) {
+					msg = "Ningun resultado";
 					int send_bytes = sck.Send(cliente, msg);
 					if (send_bytes == -1) {
-						cerr << "Error al enviar datos: " << strerror(errno)
+						cerr << "Error al enviar mensaje sin resultados: " << strerror(errno)
 								<< endl;
-						sck.Close(cliente);
-						exit(1);
+						break;
 					}
+				} else {
+					msg = "";
+					int cuenta = 0;
+					//Construimos el mensaje para el cliente con los monumentos
+					for (Monumento m : mon_seleccionados) {
+						msg += m.getURL() + '*' + m.getTitle() + '*';
+						cuenta++;
+					}
+
+					//Enviamos los monumentos
+					int send_bytes = sck.Send(cliente, msg);
+					if (send_bytes == -1) {
+						cerr << "Error al enviar monumentos: " << strerror(errno)
+								<< endl;
+						break;
+					}
+					//Recibimos el número de monumento que quiere
+					int rcv_bytes = sck.Recv(cliente, buffer, MESSAGE_SIZE);
+					if (rcv_bytes == -1 || buffer.empty()) {
+						cerr << "Error al recibir numero de monumento: " << strerror(errno)
+								<< endl;
+						break;	
+					}
+					
+					int auxiliar = stoi(buffer);
+					if(auxiliar < 5 && auxiliar > 0 && auxiliar < cuenta){
+						//Seleccionamos el monumento
+						Monumento m1 = mon_seleccionados[auxiliar-1];
+						//Buscamos el restaurante mas cercano
+						r = BusquedaRestauranteCerc(m1, restaurantes);
+						//lat;lon
+						msg = to_string(r.getLat()) + ";" + to_string(r.getLon());
+						//Enviamos la posicion del restaurante al cliente
+						int send_bytes = sck.Send(cliente, msg);
+						if (send_bytes == -1) {
+							cerr << "Error al enviar posicion del restaurante: " << strerror(errno)
+									<< endl;
+							break;
+						}
+					}
+					consultas++;
 				}
-				consultas++;
 			}
 		}
 	}
@@ -273,7 +276,7 @@ void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFi
 		cerr << "Error cerrando el socket del cliente: " << strerror(errno)
 				<< endl;
 	}
-        threadFinalizado = true;
+    threadFinalizado = true;
 }
 
 bool messageParser(const string &buf, array<string, 6> &info,
@@ -298,12 +301,13 @@ bool messageParser(const string &buf, array<string, 6> &info,
 void inicializarDatos() {
 	cout << "Descargando datos..." << endl;
 	ImageDownloader i;
-	/* Para Hendrix cambiar al directorio que sea
-	char c_monumentos[500]= "/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/restaurantes.json";
-	char c_restaurantes[500] = "/home/a691812/entregaPSCD/trabajo/TP6PSCD/datos/arte.json";
-	*/
+	// Para Hendrix cambiar al directorio que sea
+	char c_monumentos[500]= "/home/a681417/Desktop/tNP_681417_691812_687943/datos/arte.json";
+	char c_restaurantes[500] = "/home/a681417/Desktop/tNP_681417_691812_687943/datos/restaurantes.json";
+	/*
 	char c_monumentos[500]= "datos/restaurantes.json";
 	char c_restaurantes[500] = "datos/arte.json";
+	*/
 	i.downloadImage(url_monumentos, c_monumentos);
 	i.downloadImage(url_restaurante, c_restaurantes);
 	cout << "Inicializando datos..." << endl;
@@ -324,12 +328,12 @@ void inicializarDatos() {
  * introduzcamos otro caracter.
  */
 void seHaTerminado (bool &seguir, int SERVER_PORT){
-    char caracter [1];
-    char caracter2 [1] {'X'};
+    string caracter;
+    string caracter2= "X";
 
     while(seguir){
-        cin>>caracter;
-        if(strcmp(caracter,caracter2)){
+        cin >> caracter;
+        if(caracter.compare(caracter2)==0){
             seguir=false;
         }
     }
@@ -354,6 +358,7 @@ void seHaTerminado (bool &seguir, int SERVER_PORT){
     if(socket_fd == -1){
         cout << "Imposible contactar con el servidor,soy el cliente falso \n";
     }
+	cout << "soy el cliente falso, cierro el servidor \n";
     socket.Close(socket_fd);
 }
 
