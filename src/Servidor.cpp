@@ -54,7 +54,7 @@ bool messageParser(const string &buffer, array<string, 6> &info,
 
 //-------------------------------------------------------------
 int main(int argc, char* argv[]) {
-	if (argc < 1) {
+	if (argc < 2) {
 		cerr << "Invocación requiere 1 parámetro: [PORT]" << endl;
 		return 1;
 	}
