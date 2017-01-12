@@ -140,28 +140,28 @@ int main(int argc, char* argv[]) {
 		}
             }
 	}
-        cout << "Quiero Salir\n";
-        f.join();
-        //esperamos a que todos los threads finalicen
-        for (int k=0; k<10; k++) {
-            if (libres_threads[k]) {
-                if (!terminado_threads[k]) {
-                    t[k].join();
-                    cout << "finaliza la comunicacion " + to_string(k) + "\n";
-                }
-            }
-        }
-        // Cerramos el socket del servidor
-         error_code = socket.Close(socket_fd);
-         if (error_code == -1) {
-         cerr << "Error cerrando el socket del servidor: " << strerror(errno)
-         << endl;
-         }
-         // Mensaje de despedida
-         cout << "Bye bye" << endl;
-
-         return error_code;
     }
+	 cout << "Quiero Salir\n";
+		f.join();
+		//esperamos a que todos los threads finalicen
+		for (int k=0; k<10; k++) {
+			if (libres_threads[k]) {
+				if (!terminado_threads[k]) {
+					t[k].join();
+					cout << "finaliza la comunicacion " + to_string(k) + "\n";
+				}
+			}
+		}
+		// Cerramos el socket del servidor
+		 error_code = socket.Close(socket_fd);
+		 if (error_code == -1) {
+		 cerr << "Error cerrando el socket del servidor: " << strerror(errno)
+		 << endl;
+		 }
+		 // Mensaje de despedida
+		 cout << "Bye bye" << endl;
+
+		 return error_code;
 }
 //-------------------------------------------------------------
 void atenderCliente(int cliente, Socket &sck, bool &seguir,atomic_bool &threadFinalizado) {
